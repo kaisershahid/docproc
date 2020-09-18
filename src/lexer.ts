@@ -1,15 +1,11 @@
-export type MarkdownCollector = (token: string) => void;
-export type TokenDef = {
-	priority: number;
-	/**
-	 * If defined, can expect up to defined number of consecutive chars of the same token.
-	 */
-	upTo?: number;
-	line?: number;
-	column?: number;
-};
+import {
+	LexemeDef,
+	LexemeConsumer,
+	LexerInterface,
+	LexemeDefMap,
+} from "./types";
 
-const LEXEMES: { [key: string]: TokenDef } = {
+const LEXEMES: { [key: string]: LexemeDef } = {
 	"\n": { priority: 1 },
 	"\r": { priority: 1 },
 	"%": { priority: 98, upTo: 3 },
@@ -37,22 +33,31 @@ const LEXEMES: { [key: string]: TokenDef } = {
  *
  * Inferred lexemes are those that don't contain pre-defined lexemes.
  */
-export class Lexer {
+export class Lexer implements LexerInterface {
 	definedLexemes = { ...LEXEMES };
 
-	setLexeme(lexeme: string, def: TokenDef): this {
+	setLexeme(lexeme: string, def: LexemeDef): LexerInterface {
 		this.definedLexemes[lexeme] = def;
 		return this;
 	}
 
-	parse(content: string, collector: MarkdownCollector) {
+	mergeLexemes(map: LexemeDefMap, overwrite?: boolean): LexerInterface {
+		for (const lex in Object.keys(map)) {
+			if (overwrite || !this.definedLexemes[lex]) {
+				this.definedLexemes[lex] = map[lex];
+			}
+		}
+		return this;
+	}
+
+	lex(content: string, collector: LexemeConsumer) {
 		let i = 0;
 		let end = content.length;
 
 		// accumulates tokens that represent either a defined or unstructured lexeme
 		let lex = "";
 		// if set, indicates lex is a defined lexeme
-		let lex_def: TokenDef | null | undefined = null;
+		let lex_def: LexemeDef | undefined = undefined;
 		// current token
 		let ctok = "";
 
@@ -85,11 +90,11 @@ export class Lexer {
 		 * @param lexeme
 		 */
 		const _find_repeats_and_emit = (
-			def: TokenDef,
+			def: LexemeDef,
 			lexeme: string
 		): undefined | string => {
 			if (def.upTo === undefined) {
-				collector(lexeme);
+				collector(lexeme, lex_def);
 				return;
 			}
 
@@ -114,12 +119,12 @@ export class Lexer {
 				}
 			}
 
-			collector(buff);
+			collector(buff, lex_def);
 		};
 
 		const _eval_token = () => {
 			let lex_tmp = lex + ctok;
-			let lex_tmp_def: TokenDef | null | undefined = this.definedLexemes[
+			let lex_tmp_def: LexemeDef | undefined = this.definedLexemes[
 				lex_tmp
 			];
 			// console.log({ i, ctok, lex, lex_tmp, lex_tmp_def });
@@ -135,7 +140,7 @@ export class Lexer {
 					i++;
 					return;
 				} else {
-					lex_tmp_def = null;
+					lex_tmp_def = undefined;
 				}
 			}
 
@@ -156,13 +161,13 @@ export class Lexer {
 				ctok = content[i];
 				// console.log("__", { i, ctok });
 				lex = "";
-				lex_def = null;
+				lex_def = undefined;
 			}
 
 			// current char is a special token -- emit current tok and set to char
 			if (this.definedLexemes[ctok]) {
 				if (lex != "") {
-					collector(lex);
+					collector(lex, lex_def);
 				}
 
 				lex = ctok;
@@ -182,7 +187,7 @@ export class Lexer {
 		}
 
 		if (lex !== "") {
-			collector(lex);
+			collector(lex, lex_def);
 		}
 	}
 }

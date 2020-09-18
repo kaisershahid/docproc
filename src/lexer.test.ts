@@ -13,23 +13,23 @@ describe("Lexer", () => {
 	});
 
 	it("detects #", () => {
-		subject.parse("# hello", collector);
+		subject.lex("# hello", collector);
 		expect(tokens).to.deep.equal(["#", " hello"]);
 	});
 	it("detects # with repeat", () => {
-		subject.parse("#### hello", collector);
+		subject.lex("#### hello", collector);
 		expect(tokens).to.deep.equal(["####", " hello"]);
 	});
 	it("detects ~~ and ~ through prioritization", () => {
 		subject.setLexeme("~", { priority: 99 });
 		subject.setLexeme("~~", { priority: 100 });
-		subject.parse("~~~ hello", collector);
+		subject.lex("~~~ hello", collector);
 		expect(tokens).to.deep.equal(["~~", "~", " hello"]);
 	});
 	it("detects ~~~ through prioritization/repeat", () => {
 		subject.setLexeme("~", { priority: 100, upTo: 3 });
 		subject.setLexeme("~~", { priority: 99 });
-		subject.parse("~~~ hello", collector);
+		subject.lex("~~~ hello", collector);
 		expect(tokens).to.deep.equal(["~~~", " hello"]);
 	});
 });

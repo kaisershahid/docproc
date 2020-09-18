@@ -18,6 +18,6 @@ if (!fs.existsSync(filePath)) {
 // console.log(output);
 
 const md = new Lexer();
-md.parse(fs.readFileSync(filePath).toString(), (token) => {
+md.lex(fs.readFileSync(filePath).toString(), (token) => {
 	console.log("--", JSON.stringify(token));
 });
