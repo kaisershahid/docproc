@@ -79,6 +79,8 @@ export class DocProcessor {
 				}
 			}
 		});
+
+		// @todo need state.finishDoc()
 	}
 
 	getString(): string {

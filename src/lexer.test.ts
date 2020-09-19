@@ -33,4 +33,21 @@ describe("Lexer", () => {
 		subject.lex("~~~ hello", collector);
 		expect(tokens).to.deep.equal(["~~~", " hello"]);
 	});
+	it.only("handles lookahead appropriately", () => {
+		const document = "[@declaration]: hello";
+		subject.setLexeme("[@", {
+			priority: 1,
+			lookahead: (content, lex, i): any => {
+				const substr = content.substr(i, "declaration".length);
+				if (substr == "declaration") {
+					return {
+						nextIndex: i + substr.length,
+						newLexeme: lex + substr,
+					};
+				}
+			},
+		});
+		subject.lex(document, collector);
+		expect(tokens).to.deep.equal(["[@declaration", "]: hello"]);
+	});
 });

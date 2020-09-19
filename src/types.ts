@@ -7,6 +7,17 @@ export type LexemeDef = {
 	 */
 	upTo?: number;
 	type?: string;
+	lookahead?: (
+		content: string,
+		lexeme: string,
+		i: number
+	) => LexemeLookaheadReturn | any;
+};
+
+export type LexemeLookaheadReturn = {
+	nextIndex?: number;
+	newLexeme?: string;
+	newLexemeDef?: LexemeDef;
 };
 
 export type LexemeDefMap = {

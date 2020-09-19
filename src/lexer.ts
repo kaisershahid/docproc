@@ -1,8 +1,10 @@
+import { col } from "sequelize";
 import {
 	LexemeDef,
 	LexemeConsumer,
 	LexerInterface,
 	LexemeDefMap,
+	LexemeLookaheadReturn,
 } from "./types";
 
 const LEXEMES: { [key: string]: LexemeDef } = {
@@ -84,6 +86,23 @@ export class Lexer implements LexerInterface {
 		*/
 
 		/**
+		 *
+		 * @param def
+		 * @param lexeme
+		 */
+		const _execute_lookahead = (def: LexemeDef, lexeme: string) => {
+			const {
+				nextIndex,
+				newLexeme,
+				newLexemeDef,
+			}: LexemeLookaheadReturn = def.lookahead
+				? def.lookahead(content, lexeme, i)
+				: {};
+			i = nextIndex ?? i;
+			collector(newLexeme ?? lexeme, newLexemeDef ?? def);
+		};
+
+		/**
 		 * Given the token definition and token, attempt to match repeated occurrences,
 		 * emitting up to the maximum number of occurrences. If non-repeating, emit token.
 		 * @param def
@@ -93,6 +112,10 @@ export class Lexer implements LexerInterface {
 			def: LexemeDef,
 			lexeme: string
 		): undefined | string => {
+			if (def.lookahead) {
+				_execute_lookahead(def, lexeme);
+				return;
+			}
 			if (def.upTo === undefined) {
 				collector(lexeme, lex_def);
 				return;
