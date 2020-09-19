@@ -3,6 +3,7 @@ import { Lexer } from "./lexer";
 
 describe("Lexer", () => {
 	const subject = new Lexer();
+	subject.setLexeme("#", { priority: 100, upTo: 6 });
 	let tokens: string[] = [];
 	let collector = (token: string) => {
 		tokens.push(token);

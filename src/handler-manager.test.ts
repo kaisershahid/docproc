@@ -1,6 +1,11 @@
 import { expect } from "chai";
 import { HandlerManager } from "./handler-manager";
-import { HandlerInterface, LexemeConsumer, LexemeDef } from "./types";
+import {
+	DocContext,
+	HandlerInterface,
+	LexemeConsumer,
+	LexemeDef,
+} from "./types";
 
 class DummyHandler implements HandlerInterface {
 	name = "";
@@ -8,11 +13,21 @@ class DummyHandler implements HandlerInterface {
 		this.name = name;
 	}
 
+	canAccept(lexeme: string): boolean {
+		return true;
+	}
+
 	getName() {
 		return this.name;
 	}
 
 	push(lex: string, def: LexemeDef | undefined): this {
+		return this;
+	}
+
+	setContext(context: DocContext) {}
+
+	cloneInstance() {
 		return this;
 	}
 }

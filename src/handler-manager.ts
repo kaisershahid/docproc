@@ -1,4 +1,5 @@
 import {
+	DocContext,
 	HandlerAddOptions,
 	HandlerInterface,
 	HandlerManagerInterface,
@@ -30,6 +31,12 @@ export const insertAfter = <T>(handler: T, idx: number, handlers: T[]) => {
 
 export class HandlerManager implements HandlerManagerInterface {
 	handlers: HandlerInterface[] = [];
+	context?: DocContext;
+
+	setContext(context: DocContext) {
+		this.context = context;
+		this.handlers.forEach((h) => h.setContext(context));
+	}
 
 	findHandlerIndex(name: string | null | undefined): number {
 		let idx = -1;

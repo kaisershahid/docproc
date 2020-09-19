@@ -21,9 +21,24 @@ export interface LexerInterface {
 	lex: (content: string, consumer: LexemeConsumer) => void;
 }
 
-export interface HandlerInterface {
+export interface ContextAwareInterface {
+	setContext: (context: DocContext) => void;
+}
+
+export interface HandlerInterface extends ContextAwareInterface {
 	getName: () => string;
+	canAccept: (lexeme: string) => boolean;
 	push: LexemeConsumer;
+	/**
+	 * Returns a fresh clone of the handler.
+	 */
+	cloneInstance: () => HandlerInterface;
+}
+
+export enum AfterPushStatus {
+	CONTINUE,
+	DONE,
+	REJECT,
 }
 
 export type HandlerAddOptions = {
@@ -32,7 +47,7 @@ export type HandlerAddOptions = {
 	at?: string;
 };
 
-export interface HandlerManagerInterface {
+export interface HandlerManagerInterface extends ContextAwareInterface {
 	addHandler: (
 		handler: HandlerInterface,
 		options?: HandlerAddOptions
@@ -44,15 +59,10 @@ export interface StateInterface {
 	vars: AnyMap;
 	push: LexemeConsumer;
 	getCurrentHandler: () => HandlerInterface | undefined;
-	getBlockManager: () => HandlerManagerInterface;
-	getInlineManager: () => HandlerManagerInterface;
+	setCurrentHandler: (handler?: HandlerInterface) => void;
 }
 
 export type DocContext = {
 	lexer: LexerInterface;
 	state: StateInterface;
 };
-
-export interface ContextAwareInterface {
-	setContext: (context: DocContext) => void;
-}

@@ -34,7 +34,7 @@ const LEXEMES: { [key: string]: LexemeDef } = {
  * Inferred lexemes are those that don't contain pre-defined lexemes.
  */
 export class Lexer implements LexerInterface {
-	definedLexemes = { ...LEXEMES };
+	definedLexemes: LexemeDefMap = {};
 
 	setLexeme(lexeme: string, def: LexemeDef): LexerInterface {
 		this.definedLexemes[lexeme] = def;
@@ -42,7 +42,7 @@ export class Lexer implements LexerInterface {
 	}
 
 	mergeLexemes(map: LexemeDefMap, overwrite?: boolean): LexerInterface {
-		for (const lex in Object.keys(map)) {
+		for (const lex of Object.keys(map)) {
 			if (overwrite || !this.definedLexemes[lex]) {
 				this.definedLexemes[lex] = map[lex];
 			}
@@ -102,14 +102,12 @@ export class Lexer implements LexerInterface {
 			const mtok = lexeme;
 			const incr = mtok.length;
 			let count = 1;
-			// console.log("   ", { i, buff, mtok, incr });
 			for (
 				let j = i;
 				count <= def.upTo && j < content.length;
 				j += incr
 			) {
 				const subtok = content.substr(j, incr);
-				// console.log("    ", { j, subtok });
 				if (subtok == mtok) {
 					buff += subtok;
 					i = j + incr;
@@ -127,14 +125,14 @@ export class Lexer implements LexerInterface {
 			let lex_tmp_def: LexemeDef | undefined = this.definedLexemes[
 				lex_tmp
 			];
-			// console.log({ i, ctok, lex, lex_tmp, lex_tmp_def });
+			// console.log("<", { i, ctok, lex, lex_def });
+			// console.log(" ", { lex_tmp, lex_tmp_def });
 
 			// previous token is prefix of current token.
 			// if cur token's priority is higher, set cur token to this
 			// otherwise, emit last token and reset
 			if (lex_def && lex_tmp_def) {
 				if (lex_def.priority < lex_tmp_def.priority) {
-					// console.log("^^", { i, lex, lex_tmp });
 					lex = lex_tmp;
 					lex_def = lex_tmp_def;
 					i++;
@@ -156,10 +154,8 @@ export class Lexer implements LexerInterface {
 			// new char does not continue previous token. if it's repeatable, attempt to
 			// gather upTo repetitions then emit
 			if (lex_def) {
-				// console.log("vv");
 				_find_repeats_and_emit(lex_def, lex);
 				ctok = content[i];
-				// console.log("__", { i, ctok });
 				lex = "";
 				lex_def = undefined;
 			}
@@ -172,7 +168,7 @@ export class Lexer implements LexerInterface {
 
 				lex = ctok;
 				lex_def = this.definedLexemes[ctok];
-			} else {
+			} else if (ctok !== undefined) {
 				// just a plain ol character being added to a word
 				lex += ctok;
 			}
@@ -182,11 +178,10 @@ export class Lexer implements LexerInterface {
 
 		while (i < end) {
 			ctok = content[i];
-			// console.log({ i, ctok });
 			_eval_token();
 		}
 
-		if (lex !== "") {
+		if (lex !== "" && lex !== undefined) {
 			collector(lex, lex_def);
 		}
 	}
