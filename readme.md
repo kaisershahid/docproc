@@ -21,19 +21,26 @@ Seems pretty boring, right? Well, under the hood, this is all extremely barebone
 
 ## Lexemes
 
-Lexemes are split between pre-defined tokens and everything else. When you define a lexeme, you always need to give it a **priority**:
+Lexemes are split between pre-defined tokens and everything else. A **lexeme definition** is considered as:
+
+```
+{
+	priority: number,
+	upTo?: number,
+	type?: string,
+	lookead?: (content: string, lexeme: string, i: number) =>
+		undefined |
+		{nextIndex?: number, newLexeme?: string, newLexemeDef?: any}
+}
+```
+
+### `priority`
+
+When you define a lexeme, you always need to give it a **priority**:
 
 ```
 '#' => {priority: 100} // priorities are arbitrary
 ```
-
-> You can also give it an optional type:
-> 
-> ```
-> '#' => {priority: 100, type: 'hash'}
-> ```
->
-> These are called the **lexeme definition** and are emitted along with the lexeme itself.
 
 Priorities are used to select the appropriate lexeme when they both start with the same string. For instance, if you have:
 
@@ -61,6 +68,16 @@ If `#` received a higher priority, however, the lexer would emit:
 - `#`
 - `Heading`
 
+### `type`
+
+Lexemes can have an optional type, which can describe the general class the lexeme belongs to:
+
+```
+'#' => {priority: 100, type: 'hash'}
+```
+
+### `upTo` (repetition)
+
 Lexemes can also define a maximum repetition with **upTo**:
 
 ```
@@ -71,18 +88,9 @@ This would collect up to 6 `#` before emitting the lexeme.
 
 > For your own sake, don't mix `upTo` with same-prefix lexemes since they intrinsically conflict. For instance, `#` with repetition would be ignored if a higher priority `##` is defined. If `#` has a higher priority, `##` will be ignored.
 
-### Dynamic lookahead
+### `lookahead`
 
-Lexemes can also define a **lookahead** (which overrides `upTo`) function that must conform to the following definition:
-
-```typescript
-// content: input string
-// lexeme: current lexeme
-// i: 0-indexed position in content pointing to position after lexeme
-(content: string, lexeme: string, i: number) =>
-	undefined |
-	{nextIndex?: number, newLexeme?: string, newLexemeDef?: any}
-```
+Lexemes can also define a **lookahead** (which overrides `upTo`) function. This gives developers a powerful and easy way to do some fancy lookahead.
 
 If `newLexeme` is defined, this is emitted instead of `lexeme`. If `nextIndex` is defined, the pointer is moved to this position. If `newLexemeDef` is defined, this is emitted instead of original definition.
 
@@ -107,4 +115,6 @@ While you could define `[@declaration1]` and `[@another-declaration]` as complet
 }}
 ```
 
-This can be very powerful, but it's up to your imagination how you use it.
+## Lexer
+
+The lexer is responsible for iterating over an input string and applying lexeme processing rules.

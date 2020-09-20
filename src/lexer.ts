@@ -9,36 +9,66 @@ import {
 	LEXEME_COMPLETE,
 } from "./types";
 
-const LEXEMES: { [key: string]: LexemeDef } = {
-	"\n": { priority: 1 },
-	"\r": { priority: 1 },
-	"%": { priority: 98, upTo: 3 },
-	"-": { priority: 98, upTo: 3 },
-	"#": { priority: 98, upTo: 6 },
-	"<": { priority: 2 },
-	">": { priority: 2 },
-	// @todo *
-	// @todo |
+export const LEXEME_KEY_ALPHA = "_@_@_alpha";
+
+export const alphabetDefinition: LexemeDef = {
+	priority: 1,
+	type: "word",
+	lookahead: (content, lexeme, i) => {
+		const match = content.substr(i).match(/([a-zA-Z]+)/);
+		if (match) {
+			return {
+				newLexeme: lexeme + match[1],
+				nextIndex: i + match[1].length,
+			};
+		}
+	},
 };
 
+export const LEXEME_KEY_NUM = "_@_@_num";
+
 /**
- * Emits lexemes from a string. Lexemes are either pre-defined or inferred.
+ * Default definition for numbers matching:
  *
- * Pre-defined lexemes are 1 or more characters and have an intrinsic priority. For
- * lexemes that share the same prefix (e.g. `~` and `~~`), the priority determines
- * which lexeme to select.
- *
- * Pre-defined lexemes also have an optional parameter that defines `upTo` an expected
- * number of repetitions. For instance, `#` through `######` define headings. Rather
- * than defining 6 lexemes, you can simply define `#` with `{upTo:6}`.
- *
- * > Note that when defining something like `~ -> {priority:99,repeat:3}` and
- * > `~ -> {priority:100}`, `~~` will always be matched before `~~~`.
- *
- * Inferred lexemes are those that don't contain pre-defined lexemes.
+ * - whole numbers (`/\d+/`)
+ * - fractional numbers (`/\d+\.\d+/`)
+ * - loose hexadecimal (`/\dx[\da-zA-Z]+/`)
+ * - exponential (`\d+e-?\d+/`)
+ */
+export const numberDefinition: LexemeDef = {
+	priority: 1,
+	type: "number",
+	lookahead: (content, lexeme, i) => {
+		const substr = content.substr(i);
+		let match = substr.match(
+			/(\d*(\.\d+|)e-?\d+(\.\d+|)|\d+|\d*\.\d+|x[\da-fA-F]+)/
+		);
+		if (match) {
+			return {
+				newLexeme: lexeme + match[1],
+				nextIndex: i + match[1].length,
+			};
+		}
+	},
+};
+
+const _a = "a".charCodeAt(0);
+const _z = "z".charCodeAt(0);
+const _A = "A".charCodeAt(0);
+const _Z = "Z".charCodeAt(0);
+const _0 = "0".charCodeAt(0);
+const _9 = "9".charCodeAt(0);
+
+/**
+ * Reference lexer. Default instance can differentiate between letters and numbers
+ * and uses {@see alphabetDefinition} and {@see numberDefinition} as the default
+ * definitions.
  */
 export class Lexer implements LexerInterface {
-	protected definedLexemes: LexemeDefMap = {};
+	protected definedLexemes: LexemeDefMap = {
+		[LEXEME_KEY_ALPHA]: alphabetDefinition,
+		[LEXEME_KEY_NUM]: numberDefinition,
+	};
 	protected _lex: string = "";
 	protected _lex_def: LexemeDef | undefined = undefined;
 
@@ -73,6 +103,30 @@ export class Lexer implements LexerInterface {
 			}
 		}
 		return this;
+	}
+
+	/**
+	 * Attempt to map given lexeme to a definition. If a direct match isn't found, check if the first
+	 * character matches either an alphabet or number (defined by lexemes
+	 * {@see LEXEME_KEY_ALPHA} and {@see LEXEME_KEY_NUM}).
+	 */
+	findDefinition(lexeme: string): LexemeDef | undefined {
+		if (lexeme === undefined) {
+			return;
+		}
+
+		if (this.definedLexemes[lexeme]) {
+			return this.definedLexemes[lexeme];
+		}
+
+		const code = lexeme.charCodeAt(0);
+		if ((code >= _a && code <= _z) || (code >= _A && code <= _Z)) {
+			return this.definedLexemes[LEXEME_KEY_ALPHA];
+		} else if (code >= _0 && code <= _9) {
+			return this.definedLexemes[LEXEME_KEY_NUM];
+		}
+
+		return;
 	}
 
 	lex(content: string, collector: LexemeConsumer): LexerInterface {
@@ -119,7 +173,7 @@ export class Lexer implements LexerInterface {
 				newLexeme,
 				newLexemeDef,
 			}: LexemeLookaheadReturn = def.lookahead
-				? def.lookahead(content, lexeme, i)
+				? def.lookahead(content, lexeme, i) ?? {}
 				: {};
 			i = nextIndex ?? i;
 			collector(newLexeme ?? lexeme, newLexemeDef ?? def);
@@ -168,9 +222,9 @@ export class Lexer implements LexerInterface {
 
 		const _eval_token = () => {
 			let lex_tmp = lex + ctok;
-			let lex_tmp_def: LexemeDef | undefined = this.definedLexemes[
+			let lex_tmp_def: LexemeDef | undefined = this.findDefinition(
 				lex_tmp
-			];
+			);
 			// console.log("<", { i, ctok, lex, lex_def });
 			// console.log(" ", { lex_tmp, lex_tmp_def });
 
@@ -207,7 +261,7 @@ export class Lexer implements LexerInterface {
 			}
 
 			// current char is a special token -- emit current tok and set to char
-			if (this.definedLexemes[ctok]) {
+			if (this.findDefinition(ctok)) {
 				if (lex != "") {
 					collector(lex, lex_def);
 				}
@@ -218,6 +272,8 @@ export class Lexer implements LexerInterface {
 				// just a plain ol character being added to a word
 				lex += ctok;
 			}
+
+			// @question any special handling needed for ctok === undefined?
 
 			i++;
 		};

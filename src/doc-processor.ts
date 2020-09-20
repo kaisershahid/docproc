@@ -63,6 +63,7 @@ export class DocProcessor {
 	}
 
 	process(content: string) {
+		// @todo collect char/line info
 		const collector: LexemeConsumer = (lexeme, def) => {
 			if (lexeme === LEXEME_COMPLETE) {
 				return;
@@ -79,8 +80,9 @@ export class DocProcessor {
 				this.parser.setCurrentHandler(undefined);
 				this.findNewHandler(lexeme);
 				if (this.parser.push(lexeme, def) === AfterPushStatus.REJECT) {
+					// @todo include char/line
 					throw new Error(
-						`unable to process lexeme: ${lexeme} (${def})`
+						`cannot find a default blockHandler. unable to process lexeme: ${lexeme} (${def})`
 					);
 				}
 			}

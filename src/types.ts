@@ -32,8 +32,17 @@ export const LEXEME_COMPLETE = "";
 
 export type LexemeConsumer = (lexeme: string, def?: LexemeDef) => any;
 
+/**
+ * @todo add unsetLexeme(lexeme)
+ */
 export interface LexerInterface {
+	/**
+	 * Sets a single lexeme definition.
+	 */
 	setLexeme: (lexeme: string, def: LexemeDef) => LexerInterface;
+	/**
+	 * Merge a map of lexeme definitions. with the option to overwrite existing values (default should ignore).
+	 */
 	mergeLexemes: (map: LexemeDefMap, overwrite?: boolean) => LexerInterface;
 	/**
 	 * Reset all state values for a new document.
