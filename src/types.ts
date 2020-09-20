@@ -24,12 +24,29 @@ export type LexemeDefMap = {
 	[key: string]: LexemeDef;
 };
 
+/**
+ * The lexeme to emit once a document is complete. Since this isn't emitted in the normal
+ * course of `lex()`, this value is reasonable.
+ */
+export const LEXEME_COMPLETE = "";
+
 export type LexemeConsumer = (lexeme: string, def?: LexemeDef) => any;
 
 export interface LexerInterface {
 	setLexeme: (lexeme: string, def: LexemeDef) => LexerInterface;
 	mergeLexemes: (map: LexemeDefMap, overwrite?: boolean) => LexerInterface;
-	lex: (content: string, consumer: LexemeConsumer) => void;
+	/**
+	 * Reset all state values for a new document.
+	 */
+	reset: () => LexerInterface;
+	/**
+	 * Starts/resumes lexing for a document.
+	 */
+	lex: (content: string, consumer: LexemeConsumer) => LexerInterface;
+	/**
+	 * Emits `LEXEME_COMPLETE` to close out document processing.
+	 */
+	complete: (consumer: LexemeConsumer) => LexerInterface;
 }
 
 export interface ContextAwareInterface {

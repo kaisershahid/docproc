@@ -6,6 +6,8 @@ import {
 	DocContext,
 	HandlerInterface,
 	HandlerManagerInterface,
+	LexemeConsumer,
+	LEXEME_COMPLETE,
 	LexerInterface,
 	StateInterface,
 } from "./types";
@@ -61,7 +63,11 @@ export class DocProcessor {
 	}
 
 	process(content: string) {
-		this.lexer.lex(content, (lexeme, def) => {
+		const collector: LexemeConsumer = (lexeme, def) => {
+			if (lexeme === LEXEME_COMPLETE) {
+				return;
+			}
+
 			if (!this.parser.getCurrentHandler()) {
 				this.findNewHandler(lexeme);
 			}
@@ -78,8 +84,9 @@ export class DocProcessor {
 					);
 				}
 			}
-		});
-
+		};
+		this.lexer.reset().lex(content, collector);
+		this.lexer.complete(collector);
 		// @todo need state.finishDoc()
 	}
 

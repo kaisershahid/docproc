@@ -1,3 +1,4 @@
+import { timeStamp } from "console";
 import { col } from "sequelize";
 import {
 	LexemeDef,
@@ -5,6 +6,7 @@ import {
 	LexerInterface,
 	LexemeDefMap,
 	LexemeLookaheadReturn,
+	LEXEME_COMPLETE,
 } from "./types";
 
 const LEXEMES: { [key: string]: LexemeDef } = {
@@ -36,7 +38,28 @@ const LEXEMES: { [key: string]: LexemeDef } = {
  * Inferred lexemes are those that don't contain pre-defined lexemes.
  */
 export class Lexer implements LexerInterface {
-	definedLexemes: LexemeDefMap = {};
+	protected definedLexemes: LexemeDefMap = {};
+	protected _lex: string = "";
+	protected _lex_def: LexemeDef | undefined = undefined;
+
+	reset(): LexerInterface {
+		this._lex = "";
+		this._lex_def = undefined;
+		return this;
+	}
+
+	complete(collector: LexemeConsumer): LexerInterface {
+		// emit the last lexeme before complete
+		if (this._lex !== "") {
+			collector(this._lex, this._lex_def);
+		}
+
+		this._lex = LEXEME_COMPLETE;
+		this._lex_def = undefined;
+		collector(this._lex, this._lex_def);
+
+		return this;
+	}
 
 	setLexeme(lexeme: string, def: LexemeDef): LexerInterface {
 		this.definedLexemes[lexeme] = def;
@@ -52,14 +75,14 @@ export class Lexer implements LexerInterface {
 		return this;
 	}
 
-	lex(content: string, collector: LexemeConsumer) {
+	lex(content: string, collector: LexemeConsumer): LexerInterface {
 		let i = 0;
 		let end = content.length;
 
 		// accumulates tokens that represent either a defined or unstructured lexeme
-		let lex = "";
+		let lex = this._lex;
 		// if set, indicates lex is a defined lexeme
-		let lex_def: LexemeDef | undefined = undefined;
+		let lex_def = this._lex_def;
 		// current token
 		let ctok = "";
 
@@ -204,8 +227,8 @@ export class Lexer implements LexerInterface {
 			_eval_token();
 		}
 
-		if (lex !== "" && lex !== undefined) {
-			collector(lex, lex_def);
-		}
+		this._lex = lex;
+		this._lex_def = lex_def;
+		return this;
 	}
 }
