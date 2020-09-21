@@ -2,7 +2,7 @@ import { ParagraphBlockHandler } from "./paragraph";
 import { expect } from "chai";
 import { AfterPushStatus } from "../../types";
 
-describe.only("plugins.markdown.blocks.paragraph", () => {
+describe("plugins.markdown.blocks.paragraph", () => {
   const subject = new ParagraphBlockHandler();
   it("always accepts lexemes", () => {
     expect(subject.canAccept("")).to.equal(true);

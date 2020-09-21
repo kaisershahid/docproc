@@ -1,5 +1,6 @@
 import {
   AfterPushStatus,
+  BlockHandlerType,
   DocContext,
   HandlerInterface,
   LexemeConsumer,
@@ -7,7 +8,8 @@ import {
 } from "../../types";
 import { isLineEnd } from "../../utils";
 
-export class ParagraphBlockHandler implements HandlerInterface {
+export class ParagraphBlockHandler
+  implements HandlerInterface<BlockHandlerType> {
   words: string[] = [];
   context?: DocContext;
   lastLex: string = "";
@@ -30,7 +32,7 @@ export class ParagraphBlockHandler implements HandlerInterface {
     return AfterPushStatus.CONTINUE;
   }
 
-  cloneInstance(): HandlerInterface {
+  cloneInstance(): HandlerInterface<BlockHandlerType> {
     const clone = new ParagraphBlockHandler();
     return clone;
   }
