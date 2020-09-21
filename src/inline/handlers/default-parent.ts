@@ -1,6 +1,7 @@
 import { InlineActions, InlineHandlerInterface } from "../index";
 import { DocContext, HandlerInterface, LexemeDef } from "../../types";
 import { BaseHandler } from "./base";
+import { returnUnescapedString } from "../../utils";
 
 export class DefaultParentHandler extends BaseHandler {
   canAccept(lexeme: string): boolean {
@@ -12,7 +13,7 @@ export class DefaultParentHandler extends BaseHandler {
   }
 
   push(lexeme: string, def: LexemeDef | undefined): any {
-    this.words.push(lexeme);
+    this.words.push(returnUnescapedString(lexeme));
     return InlineActions.CONTINUE;
   }
 }
