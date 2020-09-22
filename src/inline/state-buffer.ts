@@ -1,7 +1,10 @@
-import { InlineActions, InlineHandlerInterface } from "./index";
+import { InlineHandlerInterface } from "./index";
 import {
+  DocContext,
   HandlerInterface,
   HandlerManagerInterface,
+  InlineActions,
+  InlineFormatterInterface,
   InlineHandlerType,
   LexemeDef,
   TypedMap,
@@ -16,15 +19,18 @@ export const actionIsDeferred = (action: InlineActions) =>
 /**
  * Collects lexemes into a properly nested structure of handlers and words.
  */
-export class InlineStateBuffer {
+export class InlineStateBuffer implements InlineFormatterInterface {
   protected manager: HandlerManagerInterface<InlineHandlerType>;
   protected defaultHandler: DefaultParentHandler;
   protected stack: HandlerInterface<InlineHandlerType>[] = [];
   protected handlersByLex: TypedMap<InlineHandlerInterface> = {};
+  protected context: DocContext;
 
-  constructor(manager: HandlerManagerInterface<InlineHandlerType>) {
-    this.manager = manager;
+  constructor(context: DocContext) {
+    this.context = context;
+    this.manager = context.inlineManager;
     this.defaultHandler = new DefaultParentHandler();
+    this.defaultHandler.setContext(context);
     this.stack.push(this.defaultHandler);
   }
 
@@ -66,8 +72,8 @@ export class InlineStateBuffer {
   ): boolean {
     let newHandler = this.findHandler(lex);
     if (newHandler) {
-      // @todo pass context
       newHandler = newHandler.cloneInstance();
+      newHandler.setContext(this.context);
       newHandler.push(lex);
       (this.stack[0] as InlineHandlerInterface).addChild(newHandler);
       this.stack.unshift(newHandler);

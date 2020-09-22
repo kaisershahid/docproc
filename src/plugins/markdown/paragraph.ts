@@ -1,5 +1,5 @@
 import {
-  AfterPushStatus,
+  BlockActions,
   BlockHandlerType,
   DocContext,
   HandlerInterface,
@@ -7,41 +7,12 @@ import {
   LexemeDef,
 } from "../../types";
 import { isLineEnd } from "../../utils";
+import { BlockBase } from "./block-base";
+import { DefaultBlock } from "../../defaults/block-handler";
 
-export class ParagraphBlockHandler
-  implements HandlerInterface<BlockHandlerType> {
-  words: string[] = [];
-  context?: DocContext;
-  lastLex: string = "";
-
-  getName() {
-    return "default";
-  }
-
-  canAccept(lexeme: string) {
-    return true;
-  }
-
-  push(lexeme: string, def?: LexemeDef): AfterPushStatus {
-    // @todo handle escape chars (make look-ahead to differentiate between translate ("\\n" -> "\n") and escape at end of line ("\\\n")
-    if (isLineEnd(lexeme) && isLineEnd(this.lastLex))
-      return AfterPushStatus.DONE;
-
-    this.lastLex = lexeme;
-    this.words.push(isLineEnd(lexeme) ? " " : lexeme);
-    return AfterPushStatus.CONTINUE;
-  }
-
-  cloneInstance(): HandlerInterface<BlockHandlerType> {
-    const clone = new ParagraphBlockHandler();
-    return clone;
-  }
-
-  setContext(context: DocContext) {
-    this.context = context;
-  }
-
-  toString() {
-    return this.words.join("");
-  }
-}
+/**
+ * Creating an abstraction here for paragraph in case we want to c
+ */
+export class ParagraphHandler
+  extends DefaultBlock
+  implements HandlerInterface<BlockHandlerType> {}

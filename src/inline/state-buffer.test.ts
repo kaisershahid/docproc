@@ -1,17 +1,18 @@
 import { expect } from "chai";
-import { HandlerManager } from "./handler-manager";
-import { InlineStateBuffer } from "./inline/state-buffer";
-import { InlineHandlerType } from "./types";
-import { SimpleWrapHandler } from "./inline/handlers/simple-wrap";
+import { HandlerManager } from "../handler-manager";
+import { InlineStateBuffer } from "./state-buffer";
+import { InlineHandlerType } from "../types";
+import { SimpleWrapHandler } from "./handlers/simple-wrap";
+import { DocProcessor } from "../doc-processor";
 
 describe("inline.InlineStateBuffer", () => {
-  const manager = new HandlerManager<InlineHandlerType>();
+  const context = new DocProcessor().makeContext();
   const boldHandler = new SimpleWrapHandler("**", "<b>", "</b>");
   const italHandler = new SimpleWrapHandler("*", "<i>", "</i>");
-  const subject = new InlineStateBuffer(manager);
+  const subject = new InlineStateBuffer(context);
 
-  manager.addHandler(boldHandler);
-  manager.addHandler(italHandler);
+  context.inlineManager.addHandler(boldHandler);
+  context.inlineManager.addHandler(italHandler);
 
   it("collects random word", () => {
     subject.push("hello");

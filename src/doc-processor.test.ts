@@ -1,6 +1,6 @@
 import { DocProcessor } from "./doc-processor";
 import {
-  AfterPushStatus,
+  BlockActions,
   BlockHandlerType,
   DocContext,
   HandlerInterface,
@@ -16,7 +16,7 @@ class DummyHandler implements HandlerInterface<BlockHandlerType> {
   context?: DocContext;
   accepting: { [key: string]: boolean } = {};
   lexemeDone: string = "\n";
-  afterPushQueue: AfterPushStatus[] = [];
+  afterPushQueue: BlockActions[] = [];
 
   constructor(name: string, accepting: any) {
     this.name = name;
@@ -35,15 +35,15 @@ class DummyHandler implements HandlerInterface<BlockHandlerType> {
   push(lex: string, def: LexemeDef | undefined) {
     if (this.lexemeDone == lex) {
       DummyHandler.receivedLexemes.push([this.name, lex]);
-      return AfterPushStatus.DONE;
+      return BlockActions.DONE;
     }
 
     if (this.accepting[lex]) {
       DummyHandler.receivedLexemes.push([this.name, lex]);
-      return AfterPushStatus.CONTINUE;
+      return BlockActions.CONTINUE;
     }
 
-    return AfterPushStatus.REJECT;
+    return BlockActions.REJECT;
   }
 
   setContext(context: DocContext) {

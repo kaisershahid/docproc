@@ -1,28 +1,9 @@
-import { HandlerInterface, InlineHandlerType, LexemeDef } from "../types";
-
-export enum InlineActions {
-  /**
-   * If a specific handler is registered for a lexeme, use that instead of current one
-   * if available (otherwise, continue using current handler).
-   */
-  DEFER,
-  /**
-   * Subsequent lexemes will be given to this handler until it finds a closing lexeme.
-   */
-  NEST,
-  /**
-   * Continue accepting lexemes.
-   */
-  CONTINUE,
-  /**
-   * Closing lexeme encountered and consumed. Take current handler off stack.
-   */
-  POP,
-  /**
-   * Lexeme not accepted. Take current handler off stack and retry with parent.
-   */
-  REJECT,
-}
+import {
+  HandlerInterface,
+  InlineHandlerType,
+  LexemeDef,
+  InlineActions,
+} from "../types";
 
 export interface InlineHandlerInterface
   extends HandlerInterface<InlineHandlerType> {

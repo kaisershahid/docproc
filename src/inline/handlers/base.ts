@@ -1,7 +1,8 @@
-import { InlineActions, InlineHandlerInterface } from "../index";
+import { InlineHandlerInterface } from "../index";
 import {
   DocContext,
   HandlerInterface,
+  InlineActions,
   InlineHandlerType,
   LexemeDef,
 } from "../../types";

@@ -1,3 +1,5 @@
+import { InlineStateBuffer } from "./inline/state-buffer";
+
 export type AnyMap = { [key: string]: any };
 export type TypedMap<T> = { [key: string]: T };
 
@@ -73,12 +75,13 @@ export interface HandlerInterface<T extends GenericHandlerType>
   canAccept: (lexeme: string) => boolean;
   push: LexemeConsumer;
   /**
-   * Returns a fresh clone of the handler.
+   * Return a new instance of the current handler with any relevant properties propagated to it.
    */
   cloneInstance: () => HandlerInterface<T>;
 }
 
-export enum AfterPushStatus {
+export enum BlockActions {
+  DEFER,
   CONTINUE,
   DONE,
   REJECT,
@@ -106,7 +109,45 @@ export interface StateInterface {
   setCurrentHandler: (handler?: HandlerInterface<BlockHandlerType>) => void;
 }
 
+export enum InlineActions {
+  /**
+   * If a specific handler is registered for a lexeme, use that instead of current one
+   * if available (otherwise, continue using current handler).
+   */
+  DEFER,
+  /**
+   * Subsequent lexemes will be given to this handler until it finds a closing lexeme.
+   */
+  NEST,
+  /**
+   * Continue accepting lexemes.
+   */
+  CONTINUE,
+  /**
+   * Closing lexeme encountered and consumed. Take current handler off stack.
+   */
+  POP,
+  /**
+   * Lexeme not accepted. Take current handler off stack and retry with parent.
+   */
+  REJECT,
+}
+
+export interface InlineFormatterInterface {
+  push: (lexeme: string, def?: LexemeDef) => void;
+}
+
+export const InlineFormatterDummy: InlineFormatterInterface = {
+  push: (lex, def) => {
+    throw new Error("inlineFormatter: did you forget to setContext()?");
+  },
+};
+
 export type DocContext = {
   lexer: LexerInterface;
   state: StateInterface;
+  blockManager: HandlerManagerInterface<BlockHandlerType>;
+  inlineManager: HandlerManagerInterface<InlineHandlerType>;
+  vars: AnyMap;
+  getInlineFormatter: () => InlineFormatterInterface;
 };

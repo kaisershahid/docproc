@@ -1,6 +1,10 @@
-import { HandlerInterface, InlineHandlerType, LexemeDef } from "../../types";
+import {
+  HandlerInterface,
+  InlineHandlerType,
+  LexemeDef,
+  InlineActions,
+} from "../../types";
 import { BaseHandler } from "./base";
-import { InlineActions } from "../index";
 import { returnUnescapedString, translateEscapedString } from "../../utils";
 
 /**
@@ -17,6 +21,10 @@ export class SimpleWrapHandler extends BaseHandler {
     this.handleLex = handleLex;
     this.startTag = startTag;
     this.endTag = endTag;
+  }
+
+  getName(): string {
+    return `simple-wrap-${this.handleLex}`;
   }
 
   lastLexEscaped = false;

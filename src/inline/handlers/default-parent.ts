@@ -1,5 +1,10 @@
-import { InlineActions, InlineHandlerInterface } from "../index";
-import { DocContext, HandlerInterface, LexemeDef } from "../../types";
+import { InlineHandlerInterface } from "../index";
+import {
+  DocContext,
+  HandlerInterface,
+  InlineActions,
+  LexemeDef,
+} from "../../types";
 import { BaseHandler } from "./base";
 import { returnUnescapedString } from "../../utils";
 

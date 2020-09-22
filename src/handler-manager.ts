@@ -29,8 +29,11 @@ export const insertAfter = <T>(handler: T, idx: number, handlers: T[]) => {
   }
 };
 
+export const NAME_DEFAULT = "DEFAULT";
+
 export class HandlerManager<T> implements HandlerManagerInterface<T> {
   handlers: HandlerInterface<T>[] = [];
+  defaultHandler?: HandlerInterface<T>;
   context?: DocContext;
 
   setContext(context: DocContext) {
@@ -53,6 +56,11 @@ export class HandlerManager<T> implements HandlerManagerInterface<T> {
     handler: HandlerInterface<T>,
     options?: HandlerAddOptions | undefined
   ): HandlerManagerInterface<T> {
+    if (handler.getName() == NAME_DEFAULT) {
+      this.defaultHandler = handler;
+      return this;
+    }
+
     const opts = options ?? {};
 
     if (opts.before) {
@@ -82,6 +90,12 @@ export class HandlerManager<T> implements HandlerManagerInterface<T> {
   }
 
   withHandlers(callback: (handlers: HandlerInterface<T>[]) => void) {
-    callback([...this.handlers]);
+    const handlers = [...this.handlers];
+    if (this.defaultHandler) handlers.push(this.defaultHandler);
+    callback(handlers);
+  }
+
+  getNames(): string[] {
+    return this.handlers.map((h) => h.getName());
   }
 }

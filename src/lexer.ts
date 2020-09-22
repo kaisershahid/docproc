@@ -1,5 +1,3 @@
-import { timeStamp } from "console";
-import { col } from "sequelize";
 import {
   LexemeDef,
   LexemeConsumer,
@@ -15,10 +13,12 @@ export const alphabetDefinition: LexemeDef = {
   priority: 1,
   type: "word",
   lookahead: (content, lexeme, i) => {
+    // move position back -- lexeme may contain an invalid boundary character
+    i -= lexeme.length;
     const match = content.substr(i).match(/([a-zA-Z]+)/);
     if (match) {
       return {
-        newLexeme: lexeme + match[1],
+        newLexeme: match[1],
         nextIndex: i + match[1].length,
       };
     }
@@ -39,13 +39,15 @@ export const numberDefinition: LexemeDef = {
   priority: 1,
   type: "number",
   lookahead: (content, lexeme, i) => {
+    // move position back -- lexeme may contain an invalid boundary character
+    i -= lexeme.length;
     const substr = content.substr(i);
     let match = substr.match(
-      /(\d*(\.\d+|)e-?\d+(\.\d+|)|\d+|\d*\.\d+|x[\da-fA-F]+)/
+      /^(\d+(\.\d+|)e-?\d+(\.\d+|)|\d*\.\d+|x[\da-fA-F]+|\d+)/
     );
     if (match) {
       return {
-        newLexeme: lexeme + match[1],
+        newLexeme: match[1],
         nextIndex: i + match[1].length,
       };
     }
@@ -69,6 +71,16 @@ const _A = "A".charCodeAt(0);
 const _Z = "Z".charCodeAt(0);
 const _0 = "0".charCodeAt(0);
 const _9 = "9".charCodeAt(0);
+
+const isNumeric = (char: string) => {
+  const code = char.charCodeAt(0);
+  return code >= _0 && code <= _9;
+};
+
+const isAlphabetic = (char: string) => {
+  const code = char.charCodeAt(0);
+  return (code >= _a && code <= _z) || (code >= _A && code <= _Z);
+};
 
 /**
  * Reference lexer. Default instance contains following ability:
@@ -135,10 +147,11 @@ export class Lexer implements LexerInterface {
       return this.definedLexemes[lexeme];
     }
 
-    const code = lexeme.charCodeAt(0);
-    if ((code >= _a && code <= _z) || (code >= _A && code <= _Z)) {
+    if (isAlphabetic(lexeme[0])) {
+      //  && isAlphabetic(lexeme[lexeme.length - 1])
       return this.definedLexemes[LEXEME_KEY_ALPHA];
-    } else if (code >= _0 && code <= _9) {
+    } else if (isNumeric(lexeme[0])) {
+      //  && isNumeric(lexeme[lexeme.length - 1])
       return this.definedLexemes[LEXEME_KEY_NUM];
     }
 
@@ -156,7 +169,7 @@ export class Lexer implements LexerInterface {
     // current token
     let ctok = "";
 
-    /* high-level overview
+    /* high-level overview @todo move to readme
 		- create $lex_tmp as $lex + $ctok
 		- set $lex_tmp_def to lexeme definition if available
 		- if $lex_def and $lex_tmp_def are both set
@@ -235,8 +248,8 @@ export class Lexer implements LexerInterface {
     const _eval_token = () => {
       let lex_tmp = lex + ctok;
       let lex_tmp_def: LexemeDef | undefined = this.findDefinition(lex_tmp);
-      // console.log("<", { i, ctok, lex, lex_def });
-      // console.log(" ", { lex_tmp, lex_tmp_def });
+      // console.log("_eval_token", { i, ctok, lex, lex_def });
+      // console.log("   ", { lex_tmp, lex_tmp_def });
 
       // previous token is prefix of current token.
       // if cur token's priority is higher, set cur token to this
@@ -277,7 +290,7 @@ export class Lexer implements LexerInterface {
         }
 
         lex = ctok;
-        lex_def = this.definedLexemes[ctok];
+        lex_def = this.findDefinition(ctok);
       } else if (ctok !== undefined) {
         // just a plain ol character being added to a word
         lex += ctok;
