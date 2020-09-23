@@ -69,7 +69,7 @@ const SPECIAL_TOKENS: LexemeDefMap = {
     lookahead: startingListItemDashStarLookahead,
   },
   "~": { priority: 20, upTo: 100, type: TYPE_TILDE }, // @todo maybe do -1 instead
-  "`": { priority: 20, upTo: 3, type: TYPE_BACKTICK },
+  "`": { priority: 20, upTo: 3, type: TYPE_BACKTICK }, // @todo redo this as a lookahead so we only return for ` or ```, not ``
   "=": { priority: 20, upTo: 3, type: TYPE_EQUAL },
   ">": { priority: 20, upTo: 5, type: TYPE_GREATER }, // could do more?
   "#": { priority: 20, upTo: 6, type: TYPE_HASH },
