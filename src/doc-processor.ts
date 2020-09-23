@@ -17,7 +17,7 @@ import {
   AnyMap,
 } from "./types";
 import { InlineStateBuffer } from "./inline/state-buffer";
-import { DefaultBlock } from "./defaults/block-handler";
+import { ParagraphHandler } from "./defaults/paragraph-handler";
 
 let id = 0;
 
@@ -133,7 +133,7 @@ export class DocProcessor {
       });
     });
 
-    return eligible[0]?.cloneInstance() ?? new DefaultBlock();
+    return eligible[0]?.cloneInstance() ?? new ParagraphHandler();
   }
 
   protected setNewHandler(lexeme: string) {

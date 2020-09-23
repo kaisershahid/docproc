@@ -13,7 +13,7 @@ import { NAME_DEFAULT } from "../handler-manager";
  * Barebones handler that defaults to <p/>.
  * @todo remove paragraph.ts?
  */
-export class DefaultBlock implements HandlerInterface<BlockHandlerType> {
+export class ParagraphHandler implements HandlerInterface<BlockHandlerType> {
   lastLex: string = "";
   context?: DocContext;
   inlineFormatter = InlineFormatterDummy;
@@ -60,7 +60,7 @@ export class DefaultBlock implements HandlerInterface<BlockHandlerType> {
   }
 
   cloneInstance(): HandlerInterface<BlockHandlerType> {
-    return new DefaultBlock();
+    return new ParagraphHandler();
   }
 
   toString() {

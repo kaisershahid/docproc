@@ -1,27 +1,9 @@
-import {
-  BlockActions,
-  BlockHandlerType,
-  HandlerInterface,
-  LexemeDef,
-} from "../../types";
-import { isLineEnd } from "../../utils";
-import { BlockBase } from "./block-base";
-import { DocProcessor } from "../../doc-processor";
+import { BlockHandlerType, HandlerInterface } from "../../types";
+import { BlockNestableBase } from "../../defaults/block-nestable-base";
 
 export class BlockquoteHandler
-  extends BlockBase
+  extends BlockNestableBase
   implements HandlerInterface<BlockHandlerType> {
-  protected static id = 0;
-  protected id = 0;
-  lastLex: string = "";
-  inBlock = false;
-  subDoc?: DocProcessor;
-
-  constructor() {
-    super();
-    this.id = ++BlockquoteHandler.id;
-  }
-
   getName() {
     return "blockquote";
   }
@@ -30,38 +12,12 @@ export class BlockquoteHandler
     return lexeme[0] == ">";
   }
 
-  getSubDoc(): DocProcessor {
-    if (!this.subDoc) {
-      this.subDoc = new DocProcessor(this.context);
-    }
-
-    return this.subDoc;
+  isLexemeIndented(lexeme: string): boolean {
+    return lexeme[0] == ">";
   }
 
-  push(lexeme: string, def?: LexemeDef): BlockActions {
-    if (lexeme[0] == ">") {
-      this.inBlock = true;
-      const substr = lexeme.substr(1).replace(/^\s+/, "");
-      if (substr != "") {
-        this.getSubDoc().push(substr, def);
-      }
-      return BlockActions.CONTINUE;
-    } else if (!isLineEnd(lexeme)) {
-      if (this.inBlock) {
-        this.getSubDoc().push(lexeme, def);
-        return BlockActions.CONTINUE;
-      } else {
-        return BlockActions.REJECT;
-      }
-    } else {
-      if (this.inBlock) {
-        this.getSubDoc().push(lexeme, def);
-        this.inBlock = false;
-        return BlockActions.CONTINUE;
-      } else {
-        return BlockActions.DONE;
-      }
-    }
+  getUnindentedLexeme(lexeme: string): string {
+    return lexeme.substr(1).replace(/^\s+/, "");
   }
 
   cloneInstance(): HandlerInterface<BlockHandlerType> {
@@ -69,6 +25,6 @@ export class BlockquoteHandler
   }
 
   toString() {
-    return "<blockquote>" + this.subDoc?.toString() + "</blockquote>";
+    return "<blockquote>" + this.getSubDoc().toString() + "</blockquote>";
   }
 }

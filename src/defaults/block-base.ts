@@ -3,7 +3,7 @@ import {
   DocContext,
   InlineFormatterDummy,
   InlineFormatterInterface,
-} from "../../types";
+} from "../types";
 
 export class BlockBase implements ContextAwareInterface {
   protected context?: DocContext;
