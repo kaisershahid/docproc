@@ -2,6 +2,8 @@ import { AnyMap } from "./types";
 
 export const isLineEnd = (str: string) => str[0] == "\n" || str[0] == "\r";
 
+export const isWhitespace = (str: string) => !!str.match(/^\s*$/);
+
 /**
  * Determines indent level based on the string's start: if a tab is given,
  * `\t` will be used to determine levels, otherwise, ` ` (space) will be used.

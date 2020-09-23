@@ -72,7 +72,7 @@ export class InlineHandlerType extends GenericHandlerType {}
 export interface HandlerInterface<T extends GenericHandlerType>
   extends ContextAwareInterface {
   getName: () => string;
-  canAccept: (lexeme: string) => boolean;
+  canAccept: (lexeme: string, def?: LexemeDef) => boolean;
   push: LexemeConsumer;
   /**
    * Return a new instance of the current handler with any relevant properties propagated to it.
@@ -81,10 +81,10 @@ export interface HandlerInterface<T extends GenericHandlerType>
 }
 
 export enum BlockActions {
-  DEFER,
-  CONTINUE,
-  DONE,
-  REJECT,
+  DEFER = "defer",
+  CONTINUE = "continue",
+  DONE = "don",
+  REJECT = "reject",
 }
 
 export type HandlerAddOptions = {

@@ -70,6 +70,7 @@ export class DocProcessor {
     // @todo if lexemes immediately after newline are whitespace, buffer first until first non-whitespace
     // @todo if line is blank or entirely whitespace, ignore
     return (lexeme, def) => {
+      // console.log("collector", this.id, { lexeme, def });
       if (lexeme === LEXEME_COMPLETE) {
         return;
       }
@@ -78,7 +79,7 @@ export class DocProcessor {
       // lexeme to use that
       if (this.curHandlerDefers) {
         this.curHandlerDefers = false;
-        let newHandler = this.findNewHandler(lexeme);
+        let newHandler = this.findNewHandler(lexeme, def);
         if (
           newHandler.getName() != this.parser.getCurrentHandler()?.getName()
         ) {
@@ -90,7 +91,7 @@ export class DocProcessor {
       }
 
       if (!this.parser.getCurrentHandler()) {
-        this.setNewHandler(lexeme);
+        this.setNewHandler(lexeme, def);
       }
 
       const result = this.parser.push(lexeme, def);
@@ -100,7 +101,7 @@ export class DocProcessor {
         this.parser.setCurrentHandler(undefined);
       } else if (result == BlockActions.REJECT) {
         this.parser.setCurrentHandler(undefined);
-        this.setNewHandler(lexeme);
+        this.setNewHandler(lexeme, def);
         if (this.parser.push(lexeme, def) === BlockActions.REJECT) {
           // @todo include char/line
           throw new Error(
@@ -123,11 +124,14 @@ export class DocProcessor {
     return this.inlineManager;
   }
 
-  protected findNewHandler(lexeme: string): HandlerInterface<BlockHandlerType> {
+  protected findNewHandler(
+    lexeme: string,
+    def?: LexemeDef
+  ): HandlerInterface<BlockHandlerType> {
     const eligible: HandlerInterface<BlockHandlerType>[] = [];
     this.blockManager.withHandlers((handlers) => {
       handlers.forEach((h) => {
-        if (h.canAccept(lexeme)) {
+        if (h.canAccept(lexeme, def)) {
           eligible.push(h);
         }
       });
@@ -136,8 +140,9 @@ export class DocProcessor {
     return eligible[0]?.cloneInstance() ?? new ParagraphHandler();
   }
 
-  protected setNewHandler(lexeme: string) {
-    const contentBlock = this.findNewHandler(lexeme);
+  protected setNewHandler(lexeme: string, def?: LexemeDef) {
+    const contentBlock = this.findNewHandler(lexeme, def);
+    // console.log("setNewHandler", { lexeme, def }, contentBlock);
     contentBlock.setContext(this.context);
     this.blocks.push(contentBlock);
     this.parser.setCurrentHandler(contentBlock);
@@ -153,13 +158,19 @@ export class DocProcessor {
     // @todo need state.finishDoc()
   }
 
+  // @todo need streamPush(content:string) to call this.lexer.lex(content) only
+  // (this aids in chunked content being received)
+
   /**
-   * For stream-based construction, use this.
+   * The primary use case for this is handlers that wrap their own docproc instance
+   * and are forwarding lexemes.
    * @param lex
    * @param def
    */
   push(lex: string, def?: LexemeDef) {
+    // console.log("->>> ", { lex, def });
     this.collector(lex, def);
+    return this;
   }
 
   toString(): string {

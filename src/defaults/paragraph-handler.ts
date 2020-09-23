@@ -6,7 +6,7 @@ import {
   InlineFormatterDummy,
   LexemeDef,
 } from "../types";
-import { isLineEnd } from "../utils";
+import { isLineEnd, isWhitespace } from "../utils";
 import { NAME_DEFAULT } from "../handler-manager";
 
 /**
@@ -51,7 +51,7 @@ export class ParagraphHandler implements HandlerInterface<BlockHandlerType> {
   push(lexeme: string, def?: LexemeDef): BlockActions {
     const lineEnd = isLineEnd(lexeme);
     if (lineEnd && isLineEnd(this.lastLex)) return BlockActions.DONE;
-    else if (lineEnd) return BlockActions.DEFER;
+    else if (isWhitespace(lexeme)) return BlockActions.DEFER;
 
     this.buff += lexeme.replace(/^\s+/, "");
     this.lastLex = lexeme;

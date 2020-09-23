@@ -9,13 +9,14 @@ import {
 
 export const LEXEME_KEY_ALPHA = "_@_@_alpha";
 
+// @todo support `_alphanumeric`
 export const alphabetDefinition: LexemeDef = {
   priority: 1,
   type: "word",
   lookahead: (content, lexeme, i) => {
     // move position back -- lexeme may contain an invalid boundary character
     i -= lexeme.length;
-    const match = content.substr(i).match(/([a-zA-Z]+)/);
+    const match = content.substr(i).match(/([\w]+)/);
     if (match) {
       return {
         newLexeme: match[1],
@@ -106,19 +107,6 @@ export class Lexer implements LexerInterface {
     return this;
   }
 
-  complete(collector: LexemeConsumer): LexerInterface {
-    // emit the last lexeme before complete
-    if (this._lex !== "") {
-      collector(this._lex, this._lex_def);
-    }
-
-    this._lex = LEXEME_COMPLETE;
-    this._lex_def = undefined;
-    collector(this._lex, this._lex_def);
-
-    return this;
-  }
-
   setLexeme(lexeme: string, def: LexemeDef): LexerInterface {
     this.definedLexemes[lexeme] = def;
     return this;
@@ -148,16 +136,17 @@ export class Lexer implements LexerInterface {
     }
 
     if (isAlphabetic(lexeme[0])) {
-      //  && isAlphabetic(lexeme[lexeme.length - 1])
       return this.definedLexemes[LEXEME_KEY_ALPHA];
     } else if (isNumeric(lexeme[0])) {
-      //  && isNumeric(lexeme[lexeme.length - 1])
       return this.definedLexemes[LEXEME_KEY_NUM];
     }
 
     return;
   }
 
+  // @todo update an internal content with this content, so that stream-based pushing
+  // gets a fully accurate context (e.g. content could end with out a new line, and another
+  // call could start without a new line, so there' incomplete info in subsequent calls)
   lex(content: string, collector: LexemeConsumer): LexerInterface {
     let i = 0;
     let end = content.length;
@@ -204,6 +193,17 @@ export class Lexer implements LexerInterface {
       }: LexemeLookaheadReturn = def.lookahead
         ? def.lookahead(content, lexeme, i) ?? {}
         : {};
+      if (nextIndex && nextIndex < i) {
+        throw {
+          message: "detected possible infinite loop",
+          i,
+          nextIndex,
+          lexeme,
+          def,
+          newLexeme,
+          newLexemeDef,
+        };
+      }
       i = nextIndex ?? i;
       collector(newLexeme ?? lexeme, newLexemeDef ?? def);
     };
@@ -214,7 +214,7 @@ export class Lexer implements LexerInterface {
      * @param def
      * @param lexeme
      */
-    const _find_repeats_and_emit = (
+    const _scan_ahead = (
       def: LexemeDef,
       lexeme: string
     ): undefined | string => {
@@ -274,10 +274,10 @@ export class Lexer implements LexerInterface {
         return;
       }
 
-      // new char does not continue previous token. if it's repeatable, attempt to
-      // gather upTo repetitions then emit
+      // new char does not continue previous token. if it's lookahead, attempt to
+      // scan ahead for more tokens and move pointer appropriately
       if (lex_def) {
-        _find_repeats_and_emit(lex_def, lex);
+        _scan_ahead(lex_def, lex);
         ctok = content[i];
         lex = "";
         lex_def = undefined;
@@ -303,11 +303,25 @@ export class Lexer implements LexerInterface {
 
     while (i < end) {
       ctok = content[i];
+      // console.log({ i, ctok });
       _eval_token();
     }
 
     this._lex = lex;
     this._lex_def = lex_def;
+    return this;
+  }
+
+  complete(collector: LexemeConsumer): LexerInterface {
+    // emit the last lexeme before complete
+    if (this._lex !== "") {
+      collector(this._lex, this._lex_def);
+    }
+
+    this._lex = LEXEME_COMPLETE;
+    this._lex_def = undefined;
+    collector(this._lex, this._lex_def);
+
     return this;
   }
 }

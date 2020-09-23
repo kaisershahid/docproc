@@ -8,6 +8,14 @@ import { isLineEnd } from "../utils";
 import { BlockBase } from "./block-base";
 import { DocProcessor } from "../doc-processor";
 
+/**
+ * Provides a convenient abstraction to check if lexemes define a nestable block
+ * structure (for markdown, this would be blockquotes and list items) by maintaining
+ * an internal {@see DocProcessor} to build up the document described in the nesting.
+ *
+ * In general, maintaining an internal {@see DocProcessor} lets you support the complete
+ * document syntax and formatting in any nestable part of the document.
+ */
 export class BlockNestableBase
   extends BlockBase
   implements HandlerInterface<BlockHandlerType> {
@@ -23,8 +31,8 @@ export class BlockNestableBase
     this.id = ++BlockNestableBase.id;
   }
 
-  getName() {
-    return "not-implemented";
+  getName(): string {
+    throw new Error("not implemented");
   }
 
   canAccept(lexeme: string) {
@@ -39,11 +47,11 @@ export class BlockNestableBase
     return this.subDoc;
   }
 
-  isLexemeIndented(lexeme: string): boolean {
+  isLexemeIndented(lexeme: string, def?: LexemeDef): boolean {
     return false;
   }
 
-  getUnindentedLexeme(lexeme: string): string {
+  getUnindentedLexeme(lexeme: string, def?: LexemeDef): string {
     throw new Error("not implemented");
   }
 
