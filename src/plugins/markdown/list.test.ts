@@ -72,37 +72,65 @@ describe("plugins.markdown.list", () => {
       addToLexer(lexer, true);
       const docprocBase = new DocProcessor({ blockManager, lexer });
 
+      // @todo make a json or yaml fixture for these scenarios
       it("handles 1 item", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1");
-        expect(docproc.toString()).to.equal("<ul>\n<li><p> i1</p></li>\n</ul>");
+        expect(docproc.toString()).to.equal(`<ul>
+<li><p> i1</p></li>
+</ul>`);
+      });
+      it("handles 1 item with text continuing on indent", () => {
+        const docproc = new DocProcessor(docprocBase.makeContext());
+        docproc.process("- i1\n  more text");
+        expect(docproc.toString()).to.equal(
+          `<ul>
+<li><p> i1  more text</p></li>
+</ul>`
+        );
       });
       it("handles 2 items", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n* i2");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p> i1 </p></li>\n<li><p> i2</p></li>\n</ul>"
+          `<ul>
+<li><p> i1 </p></li>
+<li><p> i2</p></li>
+</ul>`
         );
       });
       it("handles 2 items of different list types", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n1. i2 123.4");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p> i1 </p></li>\n</ul>\n<ol>\n<li><p> i2 123.4</p></li>\n</ol>"
+          `<ul>
+<li><p> i1 </p></li>
+</ul>
+<ol>
+<li><p> i2 123.4</p></li>
+</ol>`
         );
       });
       it("handles item with nested subitem", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n  - i1.1");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p> i1 </p>\n<ul>\n<li><p> i1.1</p></li>\n</ul></li>\n</ul>"
+          `<ul>
+<li><p> i1 </p>
+<ul>
+<li><p> i1.1</p></li>
+</ul></li>
+</ul>`
         );
       });
       it("handles item with blockquote", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n  > hello");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p> i1  </p>\n<blockquote><p> hello</p></blockquote></li>\n</ul>"
+          `<ul>
+<li><p> i1  </p>
+<blockquote><p> hello</p></blockquote></li>
+</ul>`
         );
       });
     });

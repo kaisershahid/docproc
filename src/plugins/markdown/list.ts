@@ -51,8 +51,13 @@ export class ListItemContainer {
  *   ** item continued**
  *   > you can do a blockquote!
  *   - subitem
- * 1. ordered item
+ *     > blockquote under subitem
+ *     |maybe|a   |table
+ *     |---  |--- |---
+ *     |while|ur  |at it
  *
+ * 1. ordered item
+ *    similar thing
  * ```
  *
  */
