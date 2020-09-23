@@ -2,7 +2,7 @@ import { LexemeLookaheadReturn } from "../../types";
 import { isLineEnd } from "../../utils";
 
 export const REGEX_WHITESPACE_START = /^([ \t]*)/;
-export const REGEX_LIST_ITEM_START = /^(\d+[.)]|-|\*)/;
+export const REGEX_LIST_ITEM_START = /^(\d+[.)]|-|\*)\s+/;
 export const REGEX_LIST_ITEM_START_LEXEME = /^([ \t]*\d+[.)]|-|\*)/;
 
 export const LEXEME_TYPE_WHITESPACE_START = "whitespace:starting";
@@ -46,14 +46,14 @@ export const startingWhitespaceLookahead = (
  * Will produce a new lexeme on the following conditions:
  *
  * - spaces/tabs (1+) at beginning of doc or after new line
- * - ...or followed by a single -/* (list item)
+ * - ...or followed by a single list item (-|*|1.|1))
  * - ...or followed by multiple -/* (horizontal rule)
  *
  * @param content
  * @param lexeme
  * @param i
  */
-export const startingDashStarLookahead = (
+export const startingListItemDashStarLookahead = (
   content: string,
   lexeme: string,
   i: number
@@ -74,33 +74,36 @@ export const startingDashStarLookahead = (
 
   const itemStart = content.substr(wsLookahead.nextIndex, 3);
   let match = itemStart.match(REGEX_LIST_ITEM_START);
+
   // no -/*, so no special cases
   if (!match) {
     return wsLookahead.nextIndex >= i ? wsLookahead : undefined;
   }
 
-  let type: string = LEXEME_TYPE_LIST_ITEM_START;
   i = wsLookahead.nextIndex;
   lexeme = content[i];
-  let j = i;
-  while (true) {
-    if (content[j + 1] != lexeme) {
-      break;
+  let type: string = LEXEME_TYPE_LIST_ITEM_START;
+
+  // count repeats if -/*
+  if (lexeme == "*" || lexeme == "-") {
+    let j = i;
+    do {
+      if (content[j + 1] != lexeme) {
+        break;
+      }
+    } while (j++);
+
+    // repeating, so not an item start
+    if (j > i) {
+      const repeats = i + j - 1;
+      const newLexemeDef =
+        repeats > 2 ? { type: LEXEME_TYPE_HORZ_RULE_START } : undefined;
+      return {
+        newLexeme: lexeme.repeat(repeats),
+        nextIndex: j,
+        newLexemeDef,
+      };
     }
-
-    j++;
-  }
-
-  // repeating, so not an item start
-  if (j > i) {
-    const repeats = i + j - 1;
-    const newLexemeDef =
-      repeats > 2 ? { type: LEXEME_TYPE_HORZ_RULE_START } : undefined;
-    return {
-      newLexeme: lexeme.repeat(repeats),
-      nextIndex: j,
-      newLexemeDef,
-    };
   }
 
   // otherwise, item start

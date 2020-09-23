@@ -110,6 +110,7 @@ export class ListHandler extends BlockNestableBase {
 
       // different list styles, so terminate this
       // @todo doublecheck this is good logic
+      // console.log("> ", this.listStyle, listStyle);
       if (this.listStyle != "" && this.listStyle != listStyle) {
         return BlockActions.REJECT;
       }

@@ -47,16 +47,19 @@ export class ParagraphHandler implements HandlerInterface<BlockHandlerType> {
    *
    * @param lexeme
    * @param def
+   * @todo there's a minor bug with whitespace from next line being added on to previous element -- see the list.handler
+   *       and blockquote.handler test cases with space before </>
    */
   push(lexeme: string, def?: LexemeDef): BlockActions {
     const lineEnd = isLineEnd(lexeme);
     if (lineEnd && isLineEnd(this.lastLex)) return BlockActions.DONE;
-    else if (isWhitespace(lexeme)) return BlockActions.DEFER;
 
     this.buff += lexeme.replace(/^\s+/, "");
     this.lastLex = lexeme;
     this.inlineFormatter.push(lineEnd ? " " : lexeme);
-    return this.buff == "" ? BlockActions.DEFER : BlockActions.CONTINUE;
+    return this.buff == "" || isWhitespace(lexeme)
+      ? BlockActions.DEFER
+      : BlockActions.CONTINUE;
   }
 
   cloneInstance(): HandlerInterface<BlockHandlerType> {

@@ -1,5 +1,10 @@
-import { LexemeDefMap, LexerInterface } from "../../types";
-import { startingDashStarLookahead } from "./lexdef.lookaheads";
+import {
+  LexemeDefMap,
+  LexemeLookaheadReturn,
+  LexerInterface,
+} from "../../types";
+import { startingListItemDashStarLookahead } from "./lexdef.lookaheads";
+import { LEXEME_KEY_NUM, numberDefinition, numberLookahead } from "../../lexer";
 
 const TYPE_NEWLINE = "whitespace:newline";
 const TYPE_SPACE = "whitespace";
@@ -9,8 +14,16 @@ const WHITESPACE: LexemeDefMap = {
   "\n": { priority: 8, type: TYPE_NEWLINE },
   "\r": { priority: 8, type: TYPE_NEWLINE },
   "\r\n": { priority: 9, type: TYPE_NEWLINE },
-  " ": { priority: 7, type: TYPE_SPACE, lookahead: startingDashStarLookahead },
-  "\t": { priority: 7, type: TYPE_TAB, lookahead: startingDashStarLookahead },
+  " ": {
+    priority: 7,
+    type: TYPE_SPACE,
+    lookahead: startingListItemDashStarLookahead,
+  },
+  "\t": {
+    priority: 7,
+    type: TYPE_TAB,
+    lookahead: startingListItemDashStarLookahead,
+  },
 };
 
 const TYPE_ESCAPE = "esc";
@@ -34,15 +47,26 @@ const SPECIAL_TOKENS: LexemeDefMap = {
     upTo: 2,
     type: TYPE_UNDERSCORE,
   },
+  [LEXEME_KEY_NUM]: {
+    priority: 20,
+    type: "number",
+    lookahead: (content, lexeme, i) => {
+      let lookahead = startingListItemDashStarLookahead(content, lexeme, i);
+      if (!lookahead) {
+        lookahead = numberLookahead(content, lexeme, i);
+      }
+      return lookahead;
+    },
+  },
   "*": {
     priority: 20,
     type: TYPE_STAR,
-    lookahead: startingDashStarLookahead,
+    lookahead: startingListItemDashStarLookahead,
   },
   "-": {
     priority: 20,
     type: TYPE_DASH,
-    lookahead: startingDashStarLookahead,
+    lookahead: startingListItemDashStarLookahead,
   },
   "~": { priority: 20, upTo: 100, type: TYPE_TILDE }, // @todo maybe do -1 instead
   "`": { priority: 20, upTo: 3, type: TYPE_BACKTICK },

@@ -5,7 +5,7 @@ import {
   LEXEME_TYPE_WHITESPACE_START,
   REGEX_LIST_ITEM_START,
   REGEX_WHITESPACE_START,
-  startingDashStarLookahead,
+  startingListItemDashStarLookahead,
   startingWhitespaceLookahead,
 } from "./lexdef.lookaheads";
 import { BlockHandlerType, LexemeLookaheadReturn } from "../../types";
@@ -25,10 +25,10 @@ describe("plugins.markdown.list", () => {
       expect("a\t ".match(REGEX_WHITESPACE_START)?.[1]).to.equal("");
     });
     it("matches starting list items", () => {
-      expect("1.".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("1.");
-      expect("1)".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("1)");
-      expect("-".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("-");
-      expect("*".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("*");
+      expect("1. ".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("1.");
+      expect("1) ".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("1)");
+      expect("- ".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("-");
+      expect("* ".match(REGEX_LIST_ITEM_START)?.[1]).to.equal("*");
     });
   });
   describe("lex.commonmark: startingWhitespaceLookahead()", () => {
@@ -50,8 +50,8 @@ describe("plugins.markdown.list", () => {
     it("returned undefined for ''", () => {
       expect(startingWhitespaceLookahead("", "", 0)).to.deep.equal(undefined);
     });
-    it("returned lookaheadReturn value for '\\n\\t1.' at 2", () => {
-      const lookahead = startingDashStarLookahead("\n\t1.", "\t", 2);
+    it("returned lookaheadReturn value for '\\n\\t1. ' at 2", () => {
+      const lookahead = startingListItemDashStarLookahead("\n\t1. ", "\t", 2);
       expect(lookahead).to.deep.equal({
         newLexeme: "\t1.",
         nextIndex: 4,
@@ -69,40 +69,40 @@ describe("plugins.markdown.list", () => {
       blockManager.addHandler(new ParagraphHandler());
       blockManager.addHandler(new BlockquoteHandler());
       const lexer = new Lexer();
-      addToLexer(lexer);
+      addToLexer(lexer, true);
       const docprocBase = new DocProcessor({ blockManager, lexer });
 
       it("handles 1 item", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1");
-        expect(docproc.toString()).to.equal("<ul>\n<li><p>i1</p></li>\n</ul>");
+        expect(docproc.toString()).to.equal("<ul>\n<li><p> i1</p></li>\n</ul>");
       });
       it("handles 2 items", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n* i2");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p>i1</p></li>\n<li><p>i2</p></li>\n</ul>"
+          "<ul>\n<li><p> i1 </p></li>\n<li><p> i2</p></li>\n</ul>"
         );
       });
-      it.skip("handles 2 items of different list types", () => {
+      it("handles 2 items of different list types", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
-        docproc.process("- i1\n1. i2");
+        docproc.process("- i1\n1. i2 123.4");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p>i1</p></li>\n</ul><ol><li><p>i2</p></li>\n</ol>"
+          "<ul>\n<li><p> i1 </p></li>\n</ul>\n<ol>\n<li><p> i2 123.4</p></li>\n</ol>"
         );
       });
       it("handles item with nested subitem", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n  - i1.1");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p>i1</p>\n<ul>\n<li><p>i1.1</p></li>\n</ul></li>\n</ul>"
+          "<ul>\n<li><p> i1 </p>\n<ul>\n<li><p> i1.1</p></li>\n</ul></li>\n</ul>"
         );
       });
       it("handles item with blockquote", () => {
         const docproc = new DocProcessor(docprocBase.makeContext());
         docproc.process("- i1\n  > hello");
         expect(docproc.toString()).to.equal(
-          "<ul>\n<li><p>i1</p>\n<blockquote><p>hello</p></blockquote></li>\n</ul>"
+          "<ul>\n<li><p> i1  </p>\n<blockquote><p> hello</p></blockquote></li>\n</ul>"
         );
       });
     });

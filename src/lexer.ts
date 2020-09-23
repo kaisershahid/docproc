@@ -9,24 +9,45 @@ import {
 
 export const LEXEME_KEY_ALPHA = "_@_@_alpha";
 
+export const alphabetLookahead = (
+  content: string,
+  lexeme: string,
+  i: number
+) => {
+  // move position back -- lexeme may contain an invalid boundary character
+  i -= lexeme.length;
+  const match = content.substr(i).match(/([\w]+)/);
+  if (match) {
+    return {
+      newLexeme: match[1],
+      nextIndex: i + match[1].length,
+    };
+  }
+};
+
 // @todo support `_alphanumeric`
 export const alphabetDefinition: LexemeDef = {
   priority: 1,
   type: "word",
-  lookahead: (content, lexeme, i) => {
-    // move position back -- lexeme may contain an invalid boundary character
-    i -= lexeme.length;
-    const match = content.substr(i).match(/([\w]+)/);
-    if (match) {
-      return {
-        newLexeme: match[1],
-        nextIndex: i + match[1].length,
-      };
-    }
-  },
+  lookahead: alphabetLookahead,
 };
 
 export const LEXEME_KEY_NUM = "_@_@_num";
+
+export const numberLookahead = (content: string, lexeme: string, i: number) => {
+  // move position back -- lexeme may contain an invalid boundary character
+  i -= lexeme.length;
+  const substr = content.substr(i);
+  let match = substr.match(
+    /^(\d+(\.\d+|)e-?\d+(\.\d+|)|\d*\.\d+|x[\da-fA-F]+|\d+)/
+  );
+  if (match) {
+    return {
+      newLexeme: match[1],
+      nextIndex: i + match[1].length,
+    };
+  }
+};
 
 /**
  * Default definition for numbers matching:
@@ -39,20 +60,7 @@ export const LEXEME_KEY_NUM = "_@_@_num";
 export const numberDefinition: LexemeDef = {
   priority: 1,
   type: "number",
-  lookahead: (content, lexeme, i) => {
-    // move position back -- lexeme may contain an invalid boundary character
-    i -= lexeme.length;
-    const substr = content.substr(i);
-    let match = substr.match(
-      /^(\d+(\.\d+|)e-?\d+(\.\d+|)|\d*\.\d+|x[\da-fA-F]+|\d+)/
-    );
-    if (match) {
-      return {
-        newLexeme: match[1],
-        nextIndex: i + match[1].length,
-      };
-    }
-  },
+  lookahead: numberLookahead,
 };
 
 export const backslashDefinition: LexemeDef = {
