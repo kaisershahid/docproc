@@ -17,7 +17,7 @@ export interface InlineHandlerInterface
    *
    * @param lexeme
    */
-  nextAction: (lexeme: string) => InlineActions;
+  nextAction: (lexeme: string, def?: LexemeDef) => InlineActions;
   setParent: (parent: InlineHandlerInterface) => InlineHandlerInterface;
   getParent: () => InlineHandlerInterface | null;
   addChild: (

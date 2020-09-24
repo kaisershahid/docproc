@@ -10,7 +10,7 @@ import { ParagraphHandler } from "./paragraph";
 import { HorizontalRuleHandler } from "./horizontal-rule";
 import { HeaderHandler } from "./header";
 
-describe.only("plugins.markdown.code", () => {
+describe("plugins.markdown.header", () => {
   const subject = new ListHandler();
   const blockManager = new HandlerManager<BlockHandlerType>();
   blockManager.addHandler(subject);

@@ -1,11 +1,11 @@
 import {
   HandlerInterface,
+  InlineActions,
   InlineHandlerType,
   LexemeDef,
-  InlineActions,
 } from "../../types";
 import { BaseHandler } from "./base";
-import { returnUnescapedString, translateEscapedString } from "../../utils";
+import { returnUnescapedString } from "../../utils";
 
 /**
  * Generic inline formatter that wraps text with matching opening/closing lexemes. Suitable
@@ -27,6 +27,7 @@ export class SimpleWrapHandler extends BaseHandler {
     return `simple-wrap-${this.handleLex}`;
   }
 
+  lastLex = "";
   lastLexEscaped = false;
   inTag = false;
   closed = false;
@@ -47,19 +48,71 @@ export class SimpleWrapHandler extends BaseHandler {
     return InlineActions.DEFER;
   }
 
-  push(lexeme: string, def: LexemeDef | undefined): any {
-    if (lexeme == this.handleLex && !this.lastLexEscaped) {
-      if (this.inTag) {
-        this.closed = true;
-        return InlineActions.POP;
-      }
+  isEnclosingLex(lexeme: string, def?: LexemeDef): boolean {
+    return lexeme == this.handleLex && !this.lastLexEscaped;
+  }
 
-      this.inTag = true;
-      return InlineActions.NEST;
-    } else if (this.inTag) {
-      this.words.push(returnUnescapedString(lexeme));
-      return InlineActions.CONTINUE;
+  /**
+   * If the enclosing tag is encountered (and not escaped), defer control to this method.
+   * This is used to signal opening and closing of tag
+   * @param lexeme
+   * @param def
+   * @protected
+   */
+  protected handleEnclosingLex(lexeme: string, def?: LexemeDef): InlineActions {
+    if (this.closed) {
+      return InlineActions.REJECT;
     }
+
+    if (this.inTag) {
+      this.inTag = false;
+      this.closed = true;
+      return InlineActions.POP;
+    }
+
+    this.inTag = true;
+    return InlineActions.NEST;
+  }
+
+  /**
+   * If enclosing tag is not encountered but we're inTag, defer control to this method.
+   * @param lexeme
+   * @param def
+   * @protected
+   */
+  protected handlePush(lexeme: string, def?: LexemeDef): InlineActions {
+    this.words.push(returnUnescapedString(lexeme));
+    return InlineActions.CONTINUE;
+  }
+
+  /**
+   * If enclosing tag is not encountered but we're closed, defer control to this method.
+   * Note that this is the least likely method to override.
+   * @param lexeme
+   * @param def
+   * @protected
+   */
+  protected handleClose(lexeme: string, def?: LexemeDef): InlineActions {
+    return InlineActions.REJECT;
+  }
+
+  push(lexeme: string, def?: LexemeDef | undefined): any {
+    let ret = InlineActions.REJECT;
+    if (this.isEnclosingLex(lexeme, def)) {
+      ret = this.handleEnclosingLex(lexeme, def);
+    } else if (this.inTag) {
+      if (lexeme == "\\") {
+        ret = InlineActions.CONTINUE;
+      } else {
+        ret = this.handlePush(lexeme, def);
+      }
+    } else if (this.closed) {
+      ret = this.handleClose(lexeme, def);
+    }
+
+    this.lastLexEscaped = lexeme == "\\";
+    this.lastLex = lexeme;
+    return ret;
   }
 
   toString() {

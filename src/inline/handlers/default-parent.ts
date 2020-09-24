@@ -8,6 +8,9 @@ import {
 import { BaseHandler } from "./base";
 import { returnUnescapedString } from "../../utils";
 
+/**
+ * Used to collect tokens for plaintext output.
+ */
 export class DefaultParentHandler extends BaseHandler {
   canAccept(lexeme: string): boolean {
     return false;
