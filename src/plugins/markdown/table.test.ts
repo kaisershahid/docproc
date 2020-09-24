@@ -21,7 +21,9 @@ describe("plugins.markdown.code", () => {
   const docSingleRow = `|col1|col2|col3`;
   const docWithHeader = `|hdr1|hdr2|hdr3\n|---|---|---\n${docSingleRow}`;
 
-  it.only("handles single-row table", () => {
+  // @todo check thead/tbody
+
+  it("handles single-row table", () => {
     const docproc = new DocProcessor(docprocBase.makeContext());
     docproc.process(docSingleRow);
     const table = docproc.toString();
@@ -31,7 +33,7 @@ describe("plugins.markdown.code", () => {
     );
     expect(table).to.match(/<\/table>$/);
   });
-  it.only("handles table with header", () => {
+  it("handles table with header", () => {
     const docproc = new DocProcessor(docprocBase.makeContext());
     docproc.process(docWithHeader);
     const table = docproc.toString();

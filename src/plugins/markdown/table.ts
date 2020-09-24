@@ -1,7 +1,9 @@
 import {
   BlockActions,
   BlockHandlerType,
+  DocContext,
   HandlerInterface,
+  InlineFormatterInterface,
   LexemeDef,
 } from "../../types";
 import { isLineEnd } from "../../utils";
@@ -38,15 +40,18 @@ export class TableRow {
   }
 }
 
-/**
- * @todo need inline formatter
- */
 export class TableCell {
-  buff: string[] = [];
+  context: DocContext;
+  formatter: InlineFormatterInterface;
   tag = "td";
 
+  constructor(context: DocContext) {
+    this.context = context;
+    this.formatter = context.getInlineFormatter();
+  }
+
   push(lexeme: string, def?: LexemeDef) {
-    this.buff.push(lexeme);
+    this.formatter.push(lexeme, def);
   }
 
   setAsHeader() {
@@ -54,11 +59,11 @@ export class TableCell {
   }
 
   buffToString() {
-    return this.buff.join("");
+    return this.formatter.toString();
   }
 
   toString() {
-    return `<${this.tag}>${this.buff.join("")}</${this.tag}>`;
+    return `<${this.tag}>${this.formatter.toString()}</${this.tag}>`;
   }
 }
 
@@ -95,45 +100,62 @@ export class TableHandler extends BlockBase {
     const lineEnd = isLineEnd(lexeme);
 
     if (lexeme == "|") {
-      const makeNewRow = !this.started || this.lastLineEnd;
-      if (!this.started) {
-        this.started = true;
-        //this.startTable();
-      }
-
-      if (makeNewRow) {
-        const row = new TableRow();
-        this.rows.push(row);
-      }
-
-      this.curRow().push(new TableCell());
-      ret = BlockActions.CONTINUE;
+      ret = this.handlePipe(def);
     } else if (!lineEnd) {
-      this.curRow().curCell().push(lexeme, def);
-      ret = BlockActions.CONTINUE;
+      ret = this.handleCell(lexeme, def);
     } else if (lineEnd) {
-      if (!this.lastLineEnd) {
-        ret = BlockActions.CONTINUE;
-        if (!this.foundHeader && this.rows.length == 2) {
-          // check if last row is all ---
-          let count = 0;
-          this.curRow().cells.forEach((c) => {
-            if (c.buffToString().match(/^\s*---*\s*$/)) {
-              count++;
-            }
-          });
-          if (count == this.curRow().cells.length) {
-            this.foundHeader = true;
-            this.rows.pop();
-            this.curRow().setAsHeader();
-          }
-        }
-      }
+      ret = this.handleLineEnd(def);
     }
 
     this.lastLex = lexeme;
     this.lastLineEnd = lineEnd;
     return ret;
+  }
+
+  protected handlePipe(def?: LexemeDef): BlockActions {
+    const makeNewRow = !this.started || this.lastLineEnd;
+    if (!this.started) {
+      this.started = true;
+    }
+
+    if (makeNewRow) {
+      const row = new TableRow();
+      this.rows.push(row);
+    }
+
+    this.curRow().push(new TableCell(this.context as DocContext));
+    return BlockActions.CONTINUE;
+  }
+
+  protected handleCell(lexeme: string, def?: LexemeDef): BlockActions {
+    this.curRow().curCell().push(lexeme, def);
+    return BlockActions.CONTINUE;
+  }
+
+  protected handleLineEnd(def?: LexemeDef): BlockActions {
+    let ret = BlockActions.REJECT;
+    if (!this.lastLineEnd) {
+      ret = BlockActions.CONTINUE;
+      if (!this.foundHeader && this.rows.length == 2) {
+        this.detectAndSetHeader();
+      }
+    }
+
+    return ret;
+  }
+
+  protected detectAndSetHeader() {
+    let count = 0;
+    this.curRow().cells.forEach((c) => {
+      if (c.buffToString().match(/^\s*---*\s*$/)) {
+        count++;
+      }
+    });
+    if (count == this.curRow().cells.length) {
+      this.foundHeader = true;
+      this.rows.pop();
+      this.curRow().setAsHeader();
+    }
   }
 
   cloneInstance(): HandlerInterface<BlockHandlerType> {
