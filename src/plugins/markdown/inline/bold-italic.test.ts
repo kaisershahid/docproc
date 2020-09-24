@@ -6,7 +6,7 @@ import { InlineActions } from "../../../types";
  * Because {@see BoldHandler}, {@see ItalicHandler}, {@see StrongHandler}, and {@see EmphasisHandler}
  * use the same base class, only one handler will be tested.
  */
-describe.only("plugins.markdown.inline.BoldHandler", () => {
+describe("plugins.markdown.inline.BoldHandler", () => {
   const subject = new BoldHandler();
   it("accepts __", () => {
     expect(subject.canAccept("__")).to.be.true;

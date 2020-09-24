@@ -3,7 +3,7 @@ import { BoldHandler } from "./bold-italic";
 import { InlineActions } from "../../../types";
 import { CodeHandler } from "./code";
 
-describe.only("plugins.markdown.inline.CodeHandler", () => {
+describe("plugins.markdown.inline.CodeHandler", () => {
   const subject = new CodeHandler();
   it("accepts `", () => {
     expect(subject.canAccept("`")).to.be.true;

@@ -46,7 +46,7 @@ export class BaseHandler implements InlineHandlerInterface {
     throw new Error("canAccept() not implemented");
   }
 
-  cloneInstance(): HandlerInterface<InlineHandlerInterface> {
+  cloneInstance(): HandlerInterface<InlineHandlerType> {
     throw new Error("cloneInstance() not implemented");
   }
 

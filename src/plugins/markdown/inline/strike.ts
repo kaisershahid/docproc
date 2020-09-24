@@ -1,5 +1,10 @@
 import { SimpleWrapHandler } from "../../../inline/handlers/simple-wrap";
-import { InlineActions, LexemeDef } from "../../../types";
+import {
+  HandlerInterface,
+  InlineActions,
+  InlineHandlerType,
+  LexemeDef,
+} from "../../../types";
 
 export enum InlineHandlerState {
   start,
@@ -66,5 +71,9 @@ export class StrikeHandler extends SimpleWrapHandler {
 
     this.words.push(lexeme);
     return InlineActions.CONTINUE;
+  }
+
+  cloneInstance(): HandlerInterface<InlineHandlerType> {
+    return new StrikeHandler();
   }
 }

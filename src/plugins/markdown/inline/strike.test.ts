@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { InlineHandlerState, StrikeHandler } from "./strike";
 import { InlineActions } from "../../../types";
 
-describe.only("plugins.markdown.inline.StrikeHandler", () => {
+describe("plugins.markdown.inline.StrikeHandler", () => {
   const subject = new StrikeHandler();
   it("accepts ~", () => {
     expect(subject.canAccept("~")).to.be.true;

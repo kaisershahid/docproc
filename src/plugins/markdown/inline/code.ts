@@ -1,5 +1,9 @@
 import { SimpleWrapHandler } from "../../../inline/handlers/simple-wrap";
-import { InlineActions } from "../../../types";
+import {
+  HandlerInterface,
+  InlineActions,
+  InlineHandlerType,
+} from "../../../types";
 
 export class CodeHandler extends SimpleWrapHandler {
   constructor() {
@@ -11,5 +15,9 @@ export class CodeHandler extends SimpleWrapHandler {
     return nextAction == InlineActions.DEFER
       ? InlineActions.CONTINUE
       : nextAction;
+  }
+
+  cloneInstance(): HandlerInterface<InlineHandlerType> {
+    return new CodeHandler();
   }
 }
