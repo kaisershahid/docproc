@@ -9,7 +9,6 @@ import { BlockBase } from "../../defaults/block-base";
 
 /**
  * Handle multiline <pre/>.
- * @todo remove paragraph.ts?
  */
 export class CodeHandler extends BlockBase {
   opener = "";

@@ -39,6 +39,7 @@ const TYPE_PARENTHESIS = "()";
 const TYPE_BRACKET = "[]";
 const TYPE_IMG_START = "![";
 const TYPE_PUNCTUATION = ".!?";
+const TYPE_PIPE = "|";
 
 const SPECIAL_TOKENS: LexemeDefMap = {
   "\\": { priority: 99, type: TYPE_ESCAPE },
@@ -81,6 +82,7 @@ const SPECIAL_TOKENS: LexemeDefMap = {
   "!": { priority: 20, type: TYPE_PUNCTUATION },
   ".": { priority: 20, type: TYPE_PUNCTUATION },
   "?": { priority: 20, type: TYPE_PUNCTUATION },
+  "|": { priority: 21, type: TYPE_PIPE },
 };
 
 export const addToLexer = (lexer: LexerInterface, overwrite?: boolean) => {
