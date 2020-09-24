@@ -4,6 +4,7 @@ import { isLineEnd } from "../../utils";
 export const REGEX_WHITESPACE_START = /^([ \t]*)/;
 export const REGEX_LIST_ITEM_START = /^(\d+[.)]|-|\*)\s+/;
 export const REGEX_LIST_ITEM_START_LEXEME = /^([ \t]*\d+[.)]|-|\*)/;
+export const REGEX_HORIZONTAL_RULE = /^[-*]{3,}/;
 
 export const LEXEME_TYPE_WHITESPACE_START = "whitespace:starting";
 export const LEXEME_TYPE_LIST_ITEM_START = "list-item:starting";
@@ -73,29 +74,23 @@ export const startingListItemDashStarLookahead = (
   };
 
   const itemStart = content.substr(wsLookahead.nextIndex, 3);
-  let match = itemStart.match(REGEX_LIST_ITEM_START);
+  let hrMatch = itemStart.match(REGEX_HORIZONTAL_RULE);
+  if (hrMatch) {
+    i = wsLookahead.nextIndex;
+    lexeme = content[i];
 
-  // no -/*, so no special cases
-  if (!match) {
-    return wsLookahead.nextIndex >= i ? wsLookahead : undefined;
-  }
-
-  i = wsLookahead.nextIndex;
-  lexeme = content[i];
-  let type: string = LEXEME_TYPE_LIST_ITEM_START;
-
-  // count repeats if -/*
-  if (lexeme == "*" || lexeme == "-") {
+    // count repeats if -/*
     let j = i;
     do {
-      if (content[j + 1] != lexeme) {
+      if (content[j] != lexeme) {
         break;
       }
-    } while (j++);
+      j++;
+    } while (true);
 
     // repeating, so not an item start
     if (j > i) {
-      const repeats = i + j - 1;
+      const repeats = j - i;
       const newLexemeDef =
         repeats > 2 ? { type: LEXEME_TYPE_HORZ_RULE_START } : undefined;
       return {
@@ -104,6 +99,11 @@ export const startingListItemDashStarLookahead = (
         newLexemeDef,
       };
     }
+  }
+
+  let match = itemStart.match(REGEX_LIST_ITEM_START);
+  if (!match) {
+    return wsLookahead.nextIndex >= i ? wsLookahead : undefined;
   }
 
   // otherwise, item start
