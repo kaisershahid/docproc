@@ -27,6 +27,11 @@ export type LexemeDefMap = {
   [key: string]: LexemeDef;
 };
 
+export type LexemePair = {
+  lexeme: string;
+  def?: LexemeDef;
+};
+
 /**
  * The lexeme to emit once a document is complete. Since this isn't emitted in the normal
  * course of `lex()`, this value is reasonable.
@@ -74,6 +79,12 @@ export interface HandlerInterface<T extends GenericHandlerType>
   getName: () => string;
   canAccept: (lexeme: string, def?: LexemeDef) => boolean;
   push: LexemeConsumer;
+  /**
+   * If available, this method will be called when the document ends to allow for any cleanup
+   * of the last handler. This generally is needed when the document doesn't terminate with
+   * a new line.
+   */
+  handlerEnd?: () => void;
   /**
    * Return a new instance of the current handler with any relevant properties propagated to it.
    */

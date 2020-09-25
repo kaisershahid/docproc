@@ -70,8 +70,9 @@ export class DocProcessor {
     // @todo if lexemes immediately after newline are whitespace, buffer first until first non-whitespace
     // @todo if line is blank or entirely whitespace, ignore
     return (lexeme, def) => {
-      // console.log("collector", this.id, { lexeme, def });
       if (lexeme === LEXEME_COMPLETE) {
+        const h = this.parser.getCurrentHandler() as HandlerInterface<any>;
+        if (h.handlerEnd) h.handlerEnd();
         return;
       }
 
@@ -142,7 +143,6 @@ export class DocProcessor {
 
   protected setNewHandler(lexeme: string, def?: LexemeDef) {
     const contentBlock = this.findNewHandler(lexeme, def);
-    // console.log("setNewHandler", { lexeme, def }, contentBlock);
     contentBlock.setContext(this.context);
     this.blocks.push(contentBlock);
     this.parser.setCurrentHandler(contentBlock);

@@ -67,7 +67,7 @@ describe.only("plugins.markdown.inline.link", () => {
           errMessage: "when text is closed. REJECT non-url openers",
         },
         {
-          state: LinkHandlerState.link_open,
+          state: LinkHandlerState.url_open,
           lexeme: ")",
           expect: InlineActions.CONTINUE,
           errMessage:

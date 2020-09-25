@@ -11,8 +11,8 @@ export enum LinkHandlerState {
   start,
   text_open,
   text_closed,
-  link_open,
-  link_close,
+  url_open,
+  url_closed,
 }
 
 export enum LinkType {
@@ -76,6 +76,16 @@ export class Link {
   }
 }
 
+/**
+ * Handles image and anchor elements:
+ *
+ * ```
+ * [Link Text](http://urll)
+ * [Link Text][ref]   -> [ref]: http://url
+ * ![Image Alt](http://src)
+ * ![Image Alt][ref]  -> [ref]: http://src
+ * ```
+ */
 export class BaseLinkHandler extends BaseHandler {
   opener: string;
 
@@ -100,7 +110,7 @@ export class BaseLinkHandler extends BaseHandler {
       (lexeme == "[" || lexeme == "(")
     ) {
       return InlineActions.CONTINUE;
-    } else if (this.state == LinkHandlerState.link_open) {
+    } else if (this.state == LinkHandlerState.url_open) {
       return InlineActions.CONTINUE;
     }
 
@@ -112,61 +122,105 @@ export class BaseLinkHandler extends BaseHandler {
   lastLexEsc = false;
   link: Link | any = {};
 
+  /**
+   * State transitions overview:
+   *
+   * ```
+   * start: '!?\[' -> text_open       # start building alt/display text
+   * text_open: '[^\]]+' -> text_open # also accepts '\\]'; build alt/display text
+   * text_open: '\]' -> text_closed   #
+   * text_closed: '[(\[]' -> url_open # start building url/ref
+   * url_open: '[^\])]+' -> url_open  # build url/ref
+   * url_open: '[\])]' -> url_closed  # done with link
+   * ```
+   *
+   * > Note: whichever token opens the url/ref will allow the alternate token
+   * > (e.g. `(url)` will accept `[]`)
+   *
+   * @param lexeme
+   * @param def
+   */
   push(lexeme: string, def?: LexemeDef | undefined): any {
     let ret = InlineActions.REJECT;
     switch (this.state) {
       case LinkHandlerState.start:
-        if (lexeme == this.opener) {
-          this.state = LinkHandlerState.text_open;
-          this.link = new Link(this._context as DocContext);
-          if (this.opener == "![") {
-            this.link.setToImage();
-          }
-        }
+        ret = this.handleStart(lexeme, def);
         break;
       case LinkHandlerState.text_open:
-        if (lexeme == "]" && !this.lastLexEsc) {
-          this.state = LinkHandlerState.text_closed;
-        } else if (lexeme != "\\") {
-          this.link.text.push(lexeme, def);
-        }
-
-        ret = InlineActions.CONTINUE;
-        break;
+        ret = this.handleTextOpen(lexeme, def);
       case LinkHandlerState.text_closed:
-        if (lexeme == "[") {
-          this.state = LinkHandlerState.link_open;
-          this.link.setToReference();
-          ret = InlineActions.CONTINUE;
-        } else if (lexeme == "(") {
-          this.state = LinkHandlerState.link_open;
-          ret = InlineActions.CONTINUE;
-        } else {
-          ret = InlineActions.REJECT;
-        }
+        ret = this.handleTextClosed(lexeme, def);
         break;
-      case LinkHandlerState.link_open:
-        if (!this.lastLexEsc) {
-          if (this.link.mode == LinkMode.url && lexeme == ")") {
-            ret = InlineActions.POP;
-          } else if (this.link.mode == LinkMode.ref && lexeme == "]") {
-            ret = InlineActions.POP;
-          } else if (lexeme != "\\") {
-            this.link.url.push(lexeme, def);
-            ret = InlineActions.CONTINUE;
-          }
-        } else {
-          this.link.url.push(lexeme, def);
-          ret = InlineActions.CONTINUE;
-        }
+      case LinkHandlerState.url_open:
+        ret = this.handleUrlOpen(lexeme, def);
         break;
-      case LinkHandlerState.link_close:
+      case LinkHandlerState.url_closed:
+        ret = this.handleUrlClosed(lexeme, def);
         break;
     }
 
     this.lastLex = lexeme;
     this.lastLexEsc = lexeme == "\\";
     return ret;
+  }
+
+  protected handleStart(lexeme: string, def?: LexemeDef): InlineActions {
+    if (lexeme == this.opener) {
+      this.state = LinkHandlerState.text_open;
+      this.link = new Link(this._context as DocContext);
+      if (this.opener == "![") {
+        this.link.setToImage();
+      }
+
+      return InlineActions.CONTINUE;
+    }
+
+    return InlineActions.REJECT;
+  }
+
+  protected handleTextOpen(lexeme: string, def?: LexemeDef): InlineActions {
+    if (lexeme == "]" && !this.lastLexEsc) {
+      this.state = LinkHandlerState.text_closed;
+    } else if (lexeme != "\\") {
+      this.link.text.push(lexeme, def);
+    }
+
+    return InlineActions.CONTINUE;
+  }
+
+  protected handleTextClosed(lexeme: string, def?: LexemeDef): InlineActions {
+    if (lexeme == "[") {
+      this.state = LinkHandlerState.url_open;
+      this.link.setToReference();
+      return InlineActions.CONTINUE;
+    } else if (lexeme == "(") {
+      this.state = LinkHandlerState.url_open;
+      return InlineActions.CONTINUE;
+    } else {
+      return InlineActions.REJECT;
+    }
+  }
+
+  protected handleUrlOpen(lexeme: string, def?: LexemeDef): InlineActions {
+    if (!this.lastLexEsc) {
+      if (this.link.mode == LinkMode.url && lexeme == ")") {
+        return InlineActions.POP;
+      } else if (this.link.mode == LinkMode.ref && lexeme == "]") {
+        return InlineActions.POP;
+      } else if (lexeme != "\\") {
+        this.link.url.push(lexeme, def);
+        return InlineActions.CONTINUE;
+      }
+    } else {
+      this.link.url.push(lexeme, def);
+      return InlineActions.CONTINUE;
+    }
+
+    return InlineActions.REJECT;
+  }
+
+  protected handleUrlClosed(lexeme: string, def?: LexemeDef): InlineActions {
+    return InlineActions.REJECT;
   }
 
   toString() {
