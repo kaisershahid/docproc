@@ -6,6 +6,7 @@ import {
 } from "../../types";
 import { isLineEnd } from "../../utils";
 import { BlockBase } from "../../defaults/block-base";
+import { escapeHtml } from "../../utils_/escape-html";
 
 /**
  * Handle multiline <pre/>.
@@ -91,6 +92,10 @@ export class CodeHandler extends BlockBase {
 
     const codeClass =
       "markdown-block-code" + (this.codeType != "" ? "-" + this.codeType : "");
-    return `<pre class="${codeClass}">` + this.lines.join("\n") + "</pre>";
+    return (
+      `<pre class="${codeClass}">` +
+      escapeHtml(this.lines.join("\n")) +
+      "</pre>"
+    );
   }
 }

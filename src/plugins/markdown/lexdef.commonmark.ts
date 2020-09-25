@@ -26,27 +26,27 @@ const WHITESPACE: LexemeDefMap = {
   },
 };
 
-const TYPE_ESCAPE = "esc";
-const TYPE_STAR = "*";
-const TYPE_UNDERSCORE = "_";
-const TYPE_TILDE = "~";
-const TYPE_BACKTICK = "`";
-const TYPE_DASH = "-";
-const TYPE_EQUAL = "=";
-const TYPE_GREATER = ">";
-const TYPE_HASH = "#";
-const TYPE_PARENTHESIS = "()";
-const TYPE_BRACKET = "[]";
-const TYPE_IMG_START = "![";
-const TYPE_PUNCTUATION = ".!?";
-const TYPE_PIPE = "|";
+const LEXEME_TYPE_ESCAPE = "esc";
+const LEXEME_TYPE_STAR = "*";
+const LEXEME_TYPE_UNDERSCORE = "_";
+const LEXEME_TYPE_TILDE = "~";
+const LEXEME_TYPE_BACKTICK = "`";
+const LEXEME_TYPE_DASH = "-";
+const LEXEME_TYPE_EQUAL = "=";
+const LEXEME_TYPE_GREATER = ">";
+const LEXEME_TYPE_HASH = "#";
+const LEXEME_TYPE_PARENTHESIS = "()";
+const LEXEME_TYPE_BRACKET = "[]";
+const LEXEME_TYPE_IMG_START = "![";
+const LEXEME_TYPE_PUNCTUATION = ".!?";
+const LEXEME_TYPE_PIPE = "|";
 
 const SPECIAL_TOKENS: LexemeDefMap = {
-  "\\": { priority: 99, type: TYPE_ESCAPE },
+  "\\": { priority: 99, type: LEXEME_TYPE_ESCAPE },
   _: {
     priority: 20,
     upTo: 2,
-    type: TYPE_UNDERSCORE,
+    type: LEXEME_TYPE_UNDERSCORE,
   },
   [LEXEME_KEY_NUM]: {
     priority: 20,
@@ -61,28 +61,28 @@ const SPECIAL_TOKENS: LexemeDefMap = {
   },
   "*": {
     priority: 20,
-    type: TYPE_STAR,
+    type: LEXEME_TYPE_STAR,
     lookahead: startingListItemDashStarLookahead,
   },
   "-": {
     priority: 20,
-    type: TYPE_DASH,
+    type: LEXEME_TYPE_DASH,
     lookahead: startingListItemDashStarLookahead,
   },
-  "~": { priority: 20, upTo: 100, type: TYPE_TILDE }, // @todo maybe do -1 instead
-  "`": { priority: 20, upTo: 3, type: TYPE_BACKTICK }, // @todo redo this as a lookahead so we only return for ` or ```, not ``
-  "=": { priority: 20, upTo: 3, type: TYPE_EQUAL },
-  ">": { priority: 20, upTo: 5, type: TYPE_GREATER }, // could do more?
-  "#": { priority: 20, upTo: 6, type: TYPE_HASH },
-  "(": { priority: 20, type: TYPE_PARENTHESIS },
-  ")": { priority: 20, type: TYPE_PARENTHESIS },
-  "[": { priority: 20, type: TYPE_BRACKET },
-  "]": { priority: 20, type: TYPE_BRACKET },
-  "![": { priority: 21, type: TYPE_IMG_START },
-  "!": { priority: 20, type: TYPE_PUNCTUATION },
-  ".": { priority: 20, type: TYPE_PUNCTUATION },
-  "?": { priority: 20, type: TYPE_PUNCTUATION },
-  "|": { priority: 21, type: TYPE_PIPE },
+  "~": { priority: 20, upTo: 100, type: LEXEME_TYPE_TILDE }, // @todo maybe do -1 instead
+  "`": { priority: 20, upTo: 3, type: LEXEME_TYPE_BACKTICK }, // @todo redo this as a lookahead so we only return for ` or ```, not ``
+  "=": { priority: 20, upTo: 3, type: LEXEME_TYPE_EQUAL },
+  ">": { priority: 20, upTo: 5, type: LEXEME_TYPE_GREATER }, // could do more?
+  "#": { priority: 20, upTo: 6, type: LEXEME_TYPE_HASH },
+  "(": { priority: 20, type: LEXEME_TYPE_PARENTHESIS },
+  ")": { priority: 20, type: LEXEME_TYPE_PARENTHESIS },
+  "[": { priority: 20, type: LEXEME_TYPE_BRACKET },
+  "]": { priority: 20, type: LEXEME_TYPE_BRACKET },
+  "![": { priority: 21, type: LEXEME_TYPE_IMG_START },
+  "!": { priority: 20, type: LEXEME_TYPE_PUNCTUATION },
+  ".": { priority: 20, type: LEXEME_TYPE_PUNCTUATION },
+  "?": { priority: 20, type: LEXEME_TYPE_PUNCTUATION },
+  "|": { priority: 21, type: LEXEME_TYPE_PIPE },
 };
 
 export const addToLexer = (lexer: LexerInterface, overwrite?: boolean) => {

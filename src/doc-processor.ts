@@ -1,6 +1,6 @@
 import { HandlerManager } from "./handler-manager";
 import { Lexer } from "./lexer";
-import { Parser } from "./parser";
+import { ParserContext } from "./parser-context";
 import {
   BlockActions,
   DocContext,
@@ -40,7 +40,7 @@ export class DocProcessor {
     this.id = ++id;
     const { lexer, parser, blockManager, inlineManager, vars } = context ?? {};
     this.lexer = lexer ?? new Lexer();
-    this.parser = parser ?? new Parser();
+    this.parser = parser ?? new ParserContext();
     this.blockManager = blockManager ?? new HandlerManager();
     this.inlineManager = inlineManager ?? new HandlerManager();
     this.vars = vars ?? {};

@@ -94,7 +94,7 @@ export interface HandlerInterface<T extends GenericHandlerType>
 export enum BlockActions {
   DEFER = "defer",
   CONTINUE = "continue",
-  DONE = "don",
+  DONE = "done",
   REJECT = "reject",
 }
 

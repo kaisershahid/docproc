@@ -1,15 +1,15 @@
-import { HandlerManager } from "./handler-manager";
 import {
   AnyMap,
   BlockHandlerType,
   HandlerInterface,
-  HandlerManagerInterface,
-  LexemeConsumer,
   LexemeDef,
   StateInterface,
 } from "./types";
 
-export class Parser implements StateInterface {
+/**
+ * @deprecated
+ */
+export class ParserContext implements StateInterface {
   vars: AnyMap = {};
   protected cur: HandlerInterface<BlockHandlerType> | undefined;
 

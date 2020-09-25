@@ -1,11 +1,14 @@
 import { BaseHandler } from "../../../inline/handlers/base";
 import {
   DocContext,
+  HandlerInterface,
   InlineActions,
   InlineFormatterInterface,
+  InlineHandlerType,
   LexemeDef,
 } from "../../../types";
 import { escapeHtml } from "../../../utils_/escape-html";
+import { getLinkrefByKey } from "../linkref-paragraph";
 
 export enum LinkHandlerState {
   start,
@@ -52,10 +55,19 @@ export class Link {
     return this.type == LinkType.img ? this.toImage() : this.toAnchor();
   }
 
+  resolveUrl(): string {
+    const url = this.url.toString();
+    if (this.mode == LinkMode.ref) {
+      const ref = getLinkrefByKey(url);
+      return ref?.url ?? url;
+    }
+
+    return url;
+  }
+
   toImage() {
     const buff = ['<img src="'];
-    // @todo resolve ref
-    buff.push(escapeHtml(this.url.toString()));
+    buff.push(escapeHtml(this.resolveUrl()));
     buff.push('" alt="');
     buff.push(escapeHtml(this.text.toString()));
     buff.push('" />');
@@ -64,9 +76,8 @@ export class Link {
 
   toAnchor() {
     const buff = ['<a href="'];
-    // @todo resolve ref
     const text = this.text.toString();
-    buff.push(this.url.toString());
+    buff.push(this.resolveUrl());
     buff.push('" alt="');
     buff.push(escapeHtml(text));
     buff.push('">');
@@ -236,6 +247,10 @@ export class LinkHandler extends BaseLinkHandler {
   getName(): string {
     return "anchor";
   }
+
+  cloneInstance(): HandlerInterface<InlineHandlerType> {
+    return new LinkHandler();
+  }
 }
 
 export class ImageHandler extends BaseLinkHandler {
@@ -245,5 +260,9 @@ export class ImageHandler extends BaseLinkHandler {
 
   getName(): string {
     return "image";
+  }
+
+  cloneInstance(): HandlerInterface<InlineHandlerType> {
+    return new ImageHandler();
   }
 }
