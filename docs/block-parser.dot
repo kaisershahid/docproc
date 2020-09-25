@@ -1,0 +1,61 @@
+digraph {
+    rankdir="TB"
+
+    # states and state checks
+    done [shape=doublecircle, fillcolor=green, style=filled]
+    exception [label="exception", shape=doublecircle, fillcolor=red, style=filled]
+    waitForNextLexeme [label="wait\nfor\nnext", shape=doublecircle, fillcolor=yellow, style=filled]
+    curHandlerIsNull [shape=doublecircle, color="#ffcc99", label="curHandler\n!= null", fontsize=10]
+    didLastLexDefer [shape=doublecircle, label="deferred?", fontsize=10, color="#ff99cc"]
+
+    # after-push states
+    REJECT [shape=oval, fillcolor="#ffccff", style="filled"]
+    DONE [shape=oval, fillcolor="#ffccff", style="filled"]
+    CONTINUE [shape=oval, fillcolor="#ffccff", style="filled"]
+    DEFER [shape=oval, fillcolor="#ffccff", style="filled"]
+
+    # actions
+    lexer
+    push [label="push(x)", shape=rect, color="#99ffcc"]
+    findAndSetCurrent [label="findAndSetCurrent(x)", shape=rect]
+    curHandlerPush [label="curHandler.push(x)", shape=rect]
+    findBetterHandler [label="findBetterHandler(x)", shape=rect]
+
+    # properties
+    blocks [label="blockHandlers[]"]
+    curHandler
+    isDeferred
+
+    lexer -> push [style=dotted, label="next x"]
+    push -> curHandlerIsNull [label="x not empty", color="#99ffcc"]
+    push -> done [label="x empty", color="#99ffcc"]
+
+    curHandlerIsNull -> findAndSetCurrent [label="no", color="#ffcc99"]
+    curHandlerIsNull -> didLastLexDefer [label="yes", color="#ffcc99"]
+
+    didLastLexDefer -> curHandlerPush [label="no", color="#ff99cc"]
+    didLastLexDefer -> findBetterHandler [label="yes", color="#ff99cc"]
+    findBetterHandler -> curHandlerPush
+    findBetterHandler -> curHandler [style=dotted, label="set if found"]
+    findBetterHandler -> blocks [style=dotted, label="push if found"]
+    findBetterHandler -> isDeferred [label="set false", style=dotted]
+
+    findAndSetCurrent -> curHandlerPush
+    findAndSetCurrent -> curHandler [style=dashed, label="set"]
+    findAndSetCurrent -> blocks [style=dashed, label="push"]
+    findAndSetCurrent -> exception [label="not found"]
+
+    curHandlerPush -> REJECT
+    curHandlerPush -> DONE
+    curHandlerPush -> CONTINUE
+    curHandlerPush -> DEFER
+
+    REJECT -> findAndSetCurrent [style=dotted]
+    REJECT -> push [label="retry x"]
+    DONE -> curHandler [style=dotted, label="set null"]
+    DEFER -> isDeferred [style=dotted, label="set true"]
+
+    DEFER -> waitForNextLexeme
+    CONTINUE -> waitForNextLexeme
+    DONE -> waitForNextLexeme
+}
