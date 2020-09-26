@@ -24,7 +24,7 @@ describe.only("plugins.markdown.html", () => {
     it("builds html as expected", () => {
       docproc.process("<div key='val'>body is **bold**</div>");
       expect(docproc.toString()).to.equal(
-        "<div key='val'>body is **bold**</div>"
+        "<div key='val'>body is <strong>bold</strong></div>"
       );
     });
   });
