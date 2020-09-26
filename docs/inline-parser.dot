@@ -1,0 +1,58 @@
+digraph {
+    rankdir="TB"
+
+    subgraph cluster_handler_tree {
+        label="inline handler tree"
+        handler [shape="rect", label="root handler"]
+        child1 [shape=rect, label="handler"]
+        child2 [shape=oval, label="text"]
+        handler -> child1
+        handler -> child2
+        child1 -> child2_1 [style=dotted, label="0+"]
+        child1 -> child2_2 [style=dotted, label="0+"]
+
+        child2_1 [shape=rect, label="handler", style=dotted]
+        child2_2 [shape=oval, label="text", style=dotted]
+    }
+
+    subgraph cluster_flow {
+        label = "state flow"
+
+        block
+        push [label="push(x)"]
+        isRoot
+        findHandler [label="findHandler(x)"]
+        pushHandler [label="pushHandler(h)"]
+        popHandler [label="popHandler"]
+        stack
+        curHandler
+
+        block -> push
+        push -> isRoot
+
+        pushHandler -> stack
+        stack -> curHandler
+        popHandler -> stack
+
+        isRoot -> findHandler
+        findHandler -> pushHandler [label="found"]
+        findHandler -> pushToCur [label="not found"]
+
+        isRoot -> pushToCur
+
+        pushToCur -> NEST
+        pushToCur -> DEFER
+        pushToCur -> POP
+        pushToCur -> CONTINUE
+        pushToCur -> REJECT
+
+        NEST -> pushHandler
+        POP -> popHandler
+        REJECT -> push
+
+        NEST -> waitForNext
+        DEFER -> waitForNext
+        POP -> waitForNext
+        CONTINUE -> waitForNext
+    }
+}

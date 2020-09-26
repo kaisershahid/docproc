@@ -1,98 +1,179 @@
 import { HandlerManager } from "./handler-manager";
 import { Lexer } from "./lexer";
-import { Parser } from "./parser";
+import { ParserContext } from "./parser-context";
 import {
-	AfterPushStatus,
-	DocContext,
-	HandlerInterface,
-	HandlerManagerInterface,
-	LexemeConsumer,
-	LEXEME_COMPLETE,
-	LexerInterface,
-	StateInterface,
+  BlockActions,
+  DocContext,
+  HandlerInterface,
+  HandlerManagerInterface,
+  LexemeConsumer,
+  LEXEME_COMPLETE,
+  LexerInterface,
+  StateInterface,
+  BlockHandlerType,
+  InlineHandlerType,
+  InlineFormatterInterface,
+  LexemeDef,
+  AnyMap,
 } from "./types";
+import { InlineStateBuffer } from "./inline/state-buffer";
+import { ParagraphHandler } from "./defaults/paragraph-handler";
+
+let id = 0;
 
 /**
  * Encapsulates management of lexer, parser, and all handlers.
  */
 export class DocProcessor {
-	protected lexer: LexerInterface;
-	protected parser: StateInterface;
-	protected context: DocContext;
-	protected blocks: HandlerInterface[] = [];
-	protected blockManager: HandlerManager;
-	protected inlineManager: HandlerManager;
+  protected id: number;
+  protected lexer: LexerInterface;
+  protected parser: StateInterface;
+  protected vars: AnyMap = {};
+  protected context: DocContext;
+  protected blocks: HandlerInterface<BlockHandlerType>[] = [];
+  protected blockManager: HandlerManager<BlockHandlerType>;
+  protected inlineManager: HandlerManager<InlineHandlerType>;
+  protected collector: LexemeConsumer;
+  protected curHandlerDefers = false;
 
-	constructor() {
-		this.lexer = new Lexer();
-		this.parser = new Parser();
-		this.context = { lexer: this.lexer, state: this.parser };
-		this.blockManager = new HandlerManager();
-		this.blockManager.setContext(this.context);
-		this.inlineManager = new HandlerManager();
-		this.inlineManager.setContext(this.context);
-	}
+  constructor(context?: DocContext | AnyMap) {
+    this.id = ++id;
+    const { lexer, parser, blockManager, inlineManager, vars } = context ?? {};
+    this.lexer = lexer ?? new Lexer();
+    this.parser = parser ?? new ParserContext();
+    this.blockManager = blockManager ?? new HandlerManager();
+    this.inlineManager = inlineManager ?? new HandlerManager();
+    this.vars = vars ?? {};
+    this.context = this.makeContext();
+    this.blockManager.setContext(this.context);
+    this.inlineManager.setContext(this.context);
+    this.collector = this.makeCollector();
+  }
 
-	getLexer(): LexerInterface {
-		return this.lexer;
-	}
+  makeContext(): DocContext {
+    const context = {
+      lexer: this.lexer,
+      state: this.parser,
+      blockManager: this.blockManager,
+      inlineManager: this.inlineManager,
+      vars: this.vars,
+      getInlineFormatter: (): InlineFormatterInterface => {
+        return new InlineStateBuffer(context);
+      },
+    };
 
-	getBlockManager(): HandlerManagerInterface {
-		return this.blockManager;
-	}
+    return context;
+  }
 
-	getInlineManager(): HandlerManagerInterface {
-		return this.inlineManager;
-	}
+  protected makeCollector(): LexemeConsumer {
+    // @todo collect char/line info
+    // @todo if lexemes immediately after newline are whitespace, buffer first until first non-whitespace
+    // @todo if line is blank or entirely whitespace, ignore
+    return (lexeme, def) => {
+      if (lexeme === LEXEME_COMPLETE) {
+        const h = this.parser.getCurrentHandler() as HandlerInterface<any>;
+        if (h?.handlerEnd) h.handlerEnd();
+        return;
+      }
 
-	protected findNewHandler(lexeme: string) {
-		const eligible: HandlerInterface[] = [];
-		this.blockManager.withHandlers((handlers) => {
-			handlers.forEach((h) => {
-				if (h.canAccept(lexeme)) {
-					eligible.push(h);
-				}
-			});
-		});
+      // previous lexeme signalled that if there's a better handler for current
+      // lexeme to use that
+      if (this.curHandlerDefers) {
+        this.curHandlerDefers = false;
+        let newHandler = this.findNewHandler(lexeme, def);
+        if (
+          newHandler.getName() != this.parser.getCurrentHandler()?.getName()
+        ) {
+          newHandler = newHandler.cloneInstance();
+          newHandler.setContext(this.context);
+          this.blocks.push(newHandler);
+          this.parser.setCurrentHandler(newHandler);
+        }
+      }
 
-		// @todo need default?
-		const contentBlock = eligible[0].cloneInstance();
-		contentBlock.setContext(this.context);
-		this.blocks.push(contentBlock);
-		this.parser.setCurrentHandler(contentBlock);
-	}
+      if (!this.parser.getCurrentHandler()) {
+        this.setNewHandler(lexeme, def);
+      }
 
-	process(content: string) {
-		// @todo collect char/line info
-		const collector: LexemeConsumer = (lexeme, def) => {
-			if (lexeme === LEXEME_COMPLETE) {
-				return;
-			}
+      const result = this.parser.push(lexeme, def);
+      if (result == BlockActions.DEFER) {
+        this.curHandlerDefers = true;
+      } else if (result == BlockActions.DONE) {
+        this.parser.setCurrentHandler(undefined);
+      } else if (result == BlockActions.REJECT) {
+        this.parser.setCurrentHandler(undefined);
+        this.setNewHandler(lexeme, def);
+        if (this.parser.push(lexeme, def) === BlockActions.REJECT) {
+          // @todo include char/line
+          throw new Error(
+            `cannot find a default blockHandler. unable to process lexeme: ${lexeme} (${def})`
+          );
+        }
+      }
+    };
+  }
 
-			if (!this.parser.getCurrentHandler()) {
-				this.findNewHandler(lexeme);
-			}
+  getLexer(): LexerInterface {
+    return this.lexer;
+  }
 
-			const result = this.parser.push(lexeme, def);
-			if (result == AfterPushStatus.DONE) {
-				this.parser.setCurrentHandler(undefined);
-			} else if (result == AfterPushStatus.REJECT) {
-				this.parser.setCurrentHandler(undefined);
-				this.findNewHandler(lexeme);
-				if (this.parser.push(lexeme, def) === AfterPushStatus.REJECT) {
-					// @todo include char/line
-					throw new Error(
-						`cannot find a default blockHandler. unable to process lexeme: ${lexeme} (${def})`
-					);
-				}
-			}
-		};
-		this.lexer.reset().lex(content, collector);
-		this.lexer.complete(collector);
-		// @todo need state.finishDoc()
-	}
+  getBlockManager(): HandlerManagerInterface<BlockHandlerType> {
+    return this.blockManager;
+  }
 
-	getString(): string {
-		return "@todo";
-	}
+  getInlineManager(): HandlerManagerInterface<InlineHandlerType> {
+    return this.inlineManager;
+  }
+
+  protected findNewHandler(
+    lexeme: string,
+    def?: LexemeDef
+  ): HandlerInterface<BlockHandlerType> {
+    const eligible: HandlerInterface<BlockHandlerType>[] = [];
+    this.blockManager.withHandlers((handlers) => {
+      handlers.forEach((h) => {
+        if (h.canAccept(lexeme, def)) {
+          eligible.push(h);
+        }
+      });
+    });
+
+    return eligible[0]?.cloneInstance() ?? new ParagraphHandler();
+  }
+
+  protected setNewHandler(lexeme: string, def?: LexemeDef) {
+    const contentBlock = this.findNewHandler(lexeme, def);
+    contentBlock.setContext(this.context);
+    this.blocks.push(contentBlock);
+    this.parser.setCurrentHandler(contentBlock);
+  }
+
+  /**
+   * For string-based construction, use this.
+   * @param content
+   */
+  process(content: string) {
+    this.lexer.reset().lex(content, this.collector);
+    this.lexer.complete(this.collector);
+    // @todo need state.finishDoc()
+  }
+
+  // @todo need streamPush(content:string) to call this.lexer.lex(content) only
+  // (this aids in chunked content being received)
+
+  /**
+   * The primary use case for this is handlers that wrap their own docproc instance
+   * and are forwarding lexemes.
+   * @param lex
+   * @param def
+   */
+  push(lex: string, def?: LexemeDef) {
+    // console.log("->>> ", { lex, def });
+    this.collector(lex, def);
+    return this;
+  }
+
+  toString(): string {
+    return this.blocks.join("\n");
+  }
 }

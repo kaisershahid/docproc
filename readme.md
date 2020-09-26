@@ -1,120 +1,106 @@
 # docproc
 
-An extensible document processor, suitable for human-friendly markup.
-
-## How it Works
-
-docproc follows a lexer-parser, where lexemes are emitted from the input content through the lexer and consumed by the parser.
-
-The parser manages 1 or more blocks which are fed lexemes, and the blocks in turn re-assemble the lexemes into the target output format.
+An extensible **doc**ument **proc**essor, suitable for human-friendly markup. Take it for a drive with your Markdown document of choice:
 
 ```
-[ lexer ] - $lexeme -> [ parser ]
-
-[ parser ] - $lexeme -> [ block0 ]
-                     -> [ block1 ]
-					      ......
-					 -> [ blockN ]
+ts-node src/docproc path/to/your/file
 ```
 
-Seems pretty boring, right? Well, under the hood, this is all extremely barebones. What makes docproc interesting is that it makes it easy to write and extend different types of document interpreters. Let's take a closer look.
+## Overview
 
-## Lexemes
-
-Lexemes are split between pre-defined tokens and everything else. A **lexeme definition** is considered as:
+First, let's talk document structure. Human-readable docs are linear, and they're typically organized in groups (blocks). The blocks themselves contain inline data or sub-blocks.
 
 ```
-{
-	priority: number,
-	upTo?: number,
-	type?: string,
-	lookead?: (content: string, lexeme: string, i: number) =>
-		undefined |
-		{nextIndex?: number, newLexeme?: string, newLexemeDef?: any}
-}
+## html blocks at different levels
+
+<html>
+    <div><b>bold</b></div>
+</html>
+
+## markdown
+
+> blockquote **bold**
+
+normal paragraph
 ```
 
-### `priority`
+The basic approach to all solid document processors is that they use a lexer-parser pattern to break the doc down into  its smallest part then sequentially put them back together (in our case, as blocks with inline text).
 
-When you define a lexeme, you always need to give it a **priority**:
+docproc isn't any different there. What docproc aims to do is create a pattern for configuring lexeme detection and block/inline handling. Once you get a sense for how these pieces fit it should make writing your own processor easy.
 
-```
-'#' => {priority: 100} // priorities are arbitrary
-```
+docproc makes no assumption about what you're trying to process, but it does come with a Markdown (CommonMark) plugin and DinoMark plugin, which enhances CommonMark with more dynamic processing capabilities.
 
-Priorities are used to select the appropriate lexeme when they both start with the same string. For instance, if you have:
+## How it Works (High Level)
 
-```
-'#' => {priority: 100}
-'##' => {priority: 101}
-```
-
-And the following document:
+Let's use the following snippet of Markdown as our reference:
 
 ```markdown
-###Heading
+> **blockquote**
+
+paragraph _**bold italic**_
 ```
 
-the lexer will emit:
+To start, we need to specify the following lexemes:
 
-- `##`
-- `#`
-- `Heading`
+- `>`
+- ` ` (space)
+- `**`
+- `_`
+- `\\n`
 
-If `#` received a higher priority, however, the lexer would emit:
+Anything that isn't explicitly identified is grouped together and emitted as their own lexemes.
 
-- `#`
-- `#`
-- `#`
-- `Heading`
+We'll also need to build two **block handlers**:
 
-### `type`
+1. `blockquoteHandler` will only accept lines beginning with `>`. If there are 2 consecutive newlines, the blockquote handler is done.
+2. `paragraphHandler` accepts anything. Like blockquote, it also terminates after 2 consecutive newlines.
 
-Lexemes can have an optional type, which can describe the general class the lexeme belongs to:
+Each instance of a block has its own handler instance.
 
-```
-'#' => {priority: 100, type: 'hash'}
-```
+Finally, we'll need to build two **inline handlers**: 
 
-### `upTo` (repetition)
+1. `boldHandler` starts and stops `**` and allows embedded formatting
+2. `italicHandler` starts and stops `_` and allows embedded formatting
 
-Lexemes can also define a maximum repetition with **upTo**:
+### Follow the Tokens
+ 
+Let's trace how each token changes the state of the parser, starting at the block level:
+ 
+- `>`
+    - `blockquoteHandler` can accept and is set as current handler
+- ` `, `**`, `blockquote`, `**`
+    - all accepted by `blockquoteHandler`
+- `\\n`, `\\n`
+    -  blockquote done, no longer current handler
+- `paragraph`
+    - `paragraphHandler` can accept and is set as current handler
+- `_`, `**`, `bold`, ` `, `italic`, `**`, `_`
+    - all accepted by `paragraphHandler`
 
-```
-'#' => {priority: 100, upTo: 6}
-```
+Pretty simple so far. Now let's look within the block and see what happens with the inline tokens. I'll use the paragraph handler:
 
-This would collect up to 6 `#` before emitting the lexeme.
+- `_`
+    - matches an inline handler. it'll take all tokens until another `_`, but since it allows embedding other formatting,
+      it'll first defer the tokens to specific handlers if they exist
+    - stack: `[italicHandler]`
+- `**`
+    - matches an inline handler, which nests and defers
+    - stack: `[italicHandler, boldHandler]`
+- `bold`, ` `, `italic`
+    - goes into `boldHandler`
+- `**`
+    - `boldHandler` is popped
+    - stack: `[italicHandler]`
+- `_`
+    - `italicHandler` is popped
+    - stack: `[]`
 
-> For your own sake, don't mix `upTo` with same-prefix lexemes since they intrinsically conflict. For instance, `#` with repetition would be ignored if a higher priority `##` is defined. If `#` has a higher priority, `##` will be ignored.
+When you turn the document into a string, you get all the pieces back, aseembled from fragment of HTML returned from the different handlers.
 
-### `lookahead`
+That's basically it! You can see it all put together in [<code>readme.example.ts</code>](./readme.example.ts)
 
-Lexemes can also define a **lookahead** (which overrides `upTo`) function. This gives developers a powerful and easy way to do some fancy lookahead.
+Take a deeper dive:
 
-If `newLexeme` is defined, this is emitted instead of `lexeme`. If `nextIndex` is defined, the pointer is moved to this position. If `newLexemeDef` is defined, this is emitted instead of original definition.
-
-Let's say your document supports a fixed set of declarations such as:
-
-```
-[@declaration1]: ...
-[@another-declaration]: ...
-```
-
-While you could define `[@declaration1]` and `[@another-declaration]` as completely separate lexemes, you could also define:
-
-```
-'[@' => {priority: 1, lookahead: (content, lexeme, i) => {
-	// get a substring long enough to cover whatever declarations you have
-	const substr = content.substr(i, 15);
-	const match = substr.match(/^(declaration1|another-declaration)/);
-	if (match) {
-		const newLexeme = lexeme + match[1];
-		return {nextIndex: i + match[1].length, newLexeme}
-	}
-}}
-```
-
-## Lexer
-
-The lexer is responsible for iterating over an input string and applying lexeme processing rules.
+- [Block ParserContext](./docs/block-parser.md)
+- [Inline ParserContext](./docs/inline-parser.md)
+- [Lexemes](./docs/lexer.md)

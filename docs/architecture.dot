@@ -1,0 +1,58 @@
+digraph  {
+
+	page="6";
+
+	margin=1;
+
+	rankdir="LR";
+
+	subgraph {
+		lexer [shape=square];
+		state [shape=square, label="parser"];
+		blockHandler [shape=square, style=dashed, label="block"]
+		lexer -> state [style=invis];
+		state -> blockHandler [style=invis];
+	}
+
+	subgraph {
+		statePush [label="push(lex)"];
+		blockHandlerPush [label="push(lex)"];
+	}
+
+	subgraph {
+		rankdir="LR"
+
+		action_state_setCurrentHandler [label="[re]set current handler", fontsize=9, shape=rectangle, style=dotted]
+		action_state_unsetCurrentHandler [label="unset current handler", fontsize=9, shape=rectangle, style=dotted]
+
+		block_push_CONTINUE [fontsize=8, label="CONT", shape=doublecircle, fixedsize=true, height=0.50, width=0.50];
+		block_push_DONE [fontsize=8, label="DONE", shape=doublecircle, fixedsize=true, height=0.50, width=0.50];
+		block_push_REJECT [fontsize=8, label="REJECT", shape=doublecircle, fixedsize=true, height=0.50, width=0.50];
+		{rank=same;block_push_REJECT; block_push_DONE; block_push_CONTINUE}
+	}
+
+	state -> statePush [arrowhead=none];
+	blockHandler -> blockHandlerPush [arrowhead=none];
+
+	lexer -> statePush [constraint=false];
+
+	{rank=same; state; statePush; action_state_setCurrentHandler; action_state_unsetCurrentHandler }
+	{rank=same; blockHandlerPush; blockHandlerPush; }
+
+	blockHandlerPush -> block_push_REJECT;
+	blockHandlerPush -> block_push_DONE;
+	blockHandlerPush -> block_push_CONTINUE;
+	
+	# check if we can push
+	decision_statePush_blockPush [label="has current block?", fontsize=9, shape=rectangle, style=dotted]
+	statePush -> decision_statePush_blockPush;
+	decision_statePush_blockPush -> blockHandlerPush [label="Y"];
+	decision_statePush_blockPush -> action_state_setCurrentHandler [label="N"];
+
+	block_push_REJECT -> action_state_setCurrentHandler;
+	block_push_DONE -> action_state_unsetCurrentHandler;
+	block_push_CONTINUE -> action_state_unsetCurrentHandler;
+
+	action_state_setCurrentHandler -> statePush [label="retry $lex", style=dotted];
+	action_state_unsetCurrentHandler -> lexer;
+}
