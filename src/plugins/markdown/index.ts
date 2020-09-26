@@ -18,6 +18,7 @@ import {
 import { CodeHandler as InlineCodeHandler } from "./inline/code";
 import { StrikeHandler } from "./inline/strike";
 import { ImageHandler, LinkHandler } from "./inline/link";
+import { HtmlBlockHandler } from "./html";
 
 export const registerPlugin = (
   processor: DocProcessor,
@@ -25,6 +26,7 @@ export const registerPlugin = (
 ) => {
   addToLexer(processor.getLexer(), true);
   const bm = processor.getBlockManager();
+  bm.addHandler(new HtmlBlockHandler());
   bm.addHandler(new BlockquoteHandler());
   bm.addHandler(new CodeHandler());
   bm.addHandler(new HeaderHandler());

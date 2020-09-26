@@ -5,6 +5,8 @@ import { LinkHandler } from "./inline/link";
 import { InlineActions } from "../../types";
 import { EnclosingTagState, HtmlBlockHandler } from "./html";
 import exp = require("constants");
+import { registerPlugin } from "./index";
+import doc = Mocha.reporters.doc;
 
 describe.only("plugins.markdown.html", () => {
   describe("lex.commonmark: startHtmlTagLookahead()", () => {
@@ -17,40 +19,13 @@ describe.only("plugins.markdown.html", () => {
   });
   describe("HtmlBlockHandler", () => {
     const docproc = new DocProcessor();
-    let subject: HtmlBlockHandler | any = {};
-
-    let actions: InlineActions[] = [];
-    beforeEach(() => {
-      subject = new HtmlBlockHandler();
-      subject.setContext(docproc.makeContext());
-      actions = [];
-    });
-
-    const buildHtml = (lexemes: string[]) => {
-      lexemes.forEach((lex) => {
-        actions.push(subject.push(lex));
-      });
-    };
+    registerPlugin(docproc);
 
     it("builds html as expected", () => {
-      buildHtml([
-        "<div",
-        " key='val'",
-        ">",
-        "body",
-        " ",
-        "is",
-        " ",
-        "**",
-        "bold",
-        "**",
-        "</div",
-        ">",
-      ]);
-      expect(subject.toString()).to.equal(
+      docproc.process("<div key='val'>body is **bold**</div>");
+      expect(docproc.toString()).to.equal(
         "<div key='val'>body is **bold**</div>"
       );
-      expect(subject.state).to.equal(EnclosingTagState.tag_closed);
     });
   });
 });
