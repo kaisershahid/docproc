@@ -159,6 +159,7 @@ export class BaseLinkHandler extends BaseHandler {
         break;
       case LinkHandlerState.text_open:
         ret = this.handleTextOpen(lexeme, def);
+        break;
       case LinkHandlerState.text_closed:
         ret = this.handleTextClosed(lexeme, def);
         break;

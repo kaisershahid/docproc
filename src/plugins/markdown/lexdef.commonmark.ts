@@ -51,8 +51,13 @@ const SPECIAL_TOKENS: LexemeDefMap = {
   [LEXEME_KEY_NUM]: {
     priority: 20,
     type: "number",
-    lookahead: (content, lexeme, i) => {
-      let lookahead = startingListItemDashStarLookahead(content, lexeme, i);
+    lookahead: (content, lexeme, i, curDef) => {
+      let lookahead = startingListItemDashStarLookahead(
+        content,
+        lexeme,
+        i,
+        curDef
+      );
       if (!lookahead) {
         lookahead = numberLookahead(content, lexeme, i);
       }
@@ -61,6 +66,7 @@ const SPECIAL_TOKENS: LexemeDefMap = {
   },
   "*": {
     priority: 20,
+    upTo: 2,
     type: LEXEME_TYPE_STAR,
     lookahead: startingListItemDashStarLookahead,
   },

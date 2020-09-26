@@ -56,7 +56,7 @@ export class ParagraphHandler implements HandlerInterface<BlockHandlerType> {
 
     this.buff += lexeme.replace(/^\s+/, "");
     this.lastLex = lexeme;
-    this.inlineFormatter.push(lineEnd ? " " : lexeme);
+    this.inlineFormatter.push(lexeme);
     return this.buff == "" || isWhitespace(lexeme)
       ? BlockActions.DEFER
       : BlockActions.CONTINUE;

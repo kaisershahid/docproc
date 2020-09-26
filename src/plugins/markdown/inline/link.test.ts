@@ -8,7 +8,7 @@ import {
 import { DocProcessor } from "../../../doc-processor";
 import { InlineActions } from "../../../types";
 
-describe.only("plugins.markdown.inline.link", () => {
+describe("plugins.markdown.inline.link", () => {
   /**
    * Covers all facets of link lifecycle.
    */

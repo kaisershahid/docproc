@@ -13,7 +13,8 @@ export type LexemeDef = {
   lookahead?: (
     content: string,
     lexeme: string,
-    i: number
+    i: number,
+    curDef: LexemeDef
   ) => LexemeLookaheadReturn | any;
 };
 

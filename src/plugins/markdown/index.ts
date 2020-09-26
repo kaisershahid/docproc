@@ -2,7 +2,7 @@ import { PluginOptions } from "..";
 import { DocProcessor } from "../../doc-processor";
 import { addToLexer } from "./lexdef.commonmark";
 import { BlockquoteHandler } from "./blockquote";
-import { CodeHandler } from "./code";
+import { CodeHandler, CodeIndentedHandler } from "./code";
 import { HeaderHandler } from "./header";
 import { HorizontalRuleHandler } from "./horizontal-rule";
 import { LinkrefParagraphHandler } from "./linkref-paragraph";
@@ -23,7 +23,7 @@ export const registerPlugin = (
   processor: DocProcessor,
   opts?: PluginOptions
 ) => {
-  addToLexer(processor.getLexer());
+  addToLexer(processor.getLexer(), true);
   const bm = processor.getBlockManager();
   bm.addHandler(new BlockquoteHandler());
   bm.addHandler(new CodeHandler());
@@ -31,6 +31,7 @@ export const registerPlugin = (
   bm.addHandler(new HorizontalRuleHandler());
   bm.addHandler(new LinkrefParagraphHandler());
   bm.addHandler(new ListHandler());
+  bm.addHandler(new CodeIndentedHandler());
   bm.addHandler(new TableHandler());
   bm.addHandler(new ParagraphHandler());
 

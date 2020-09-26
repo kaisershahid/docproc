@@ -72,7 +72,7 @@ export class DocProcessor {
     return (lexeme, def) => {
       if (lexeme === LEXEME_COMPLETE) {
         const h = this.parser.getCurrentHandler() as HandlerInterface<any>;
-        if (h.handlerEnd) h.handlerEnd();
+        if (h?.handlerEnd) h.handlerEnd();
         return;
       }
 

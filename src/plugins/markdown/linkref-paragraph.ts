@@ -83,7 +83,9 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
       return BlockActions.CONTINUE;
     } else if (!this.inGoodShape) {
       let ret = super.push(lexeme, def);
-      return BlockActions.CONTINUE;
+      return ret == BlockActions.DONE
+        ? BlockActions.DONE
+        : BlockActions.CONTINUE;
     }
 
     this.lineBuff.push({ lexeme, def });

@@ -1,4 +1,4 @@
-import { LexemeLookaheadReturn } from "../../types";
+import { LexemeDef, LexemeLookaheadReturn } from "../../types";
 import { isLineEnd } from "../../utils";
 
 export const REGEX_WHITESPACE_START = /^([ \t]*)/;
@@ -44,24 +44,43 @@ export const startingWhitespaceLookahead = (
 };
 
 /**
- * Will produce a new lexeme on the following conditions:
+ * Will produce a new lexeme on the following main conditions:
  *
  * - spaces/tabs (1+) at beginning of doc or after new line
  * - ...or followed by a single list item (-|*|1.|1))
  * - ...or followed by multiple -/* (horizontal rule)
  *
+ * IF the lexeme isn't immediately after a newline and `upTo` is defined,
+ * the fallback will attempt to get up to the specified repetitions.
+ *
  * @param content
  * @param lexeme
  * @param i
+ * @param curDef
  */
 export const startingListItemDashStarLookahead = (
   content: string,
   lexeme: string,
-  i: number
+  i: number,
+  curDef: LexemeDef
 ): LexemeLookaheadReturn | any => {
-  const last = content[i - 2];
+  const last = content[i - lexeme.length - 1];
   // we want either `undefined` or a line end
   if (last !== undefined && !isLineEnd(last)) {
+    if (curDef.upTo) {
+      let repeated = consumeRepeatingChars(
+        lexeme,
+        content,
+        i - lexeme.length,
+        curDef.upTo
+      );
+      if (repeated.length > 1) {
+        return {
+          newLexeme: repeated,
+          nextIndex: i - lexeme.length + repeated.length,
+        };
+      }
+    }
     return;
   }
 
@@ -78,24 +97,19 @@ export const startingListItemDashStarLookahead = (
   if (hrMatch) {
     i = wsLookahead.nextIndex;
     lexeme = content[i];
-
-    // count repeats if -/*
-    let j = i;
-    do {
-      if (content[j] != lexeme) {
-        break;
-      }
-      j++;
-    } while (true);
+    let repeated = consumeRepeatingChars(
+      content[wsLookahead.nextIndex],
+      content,
+      wsLookahead.nextIndex
+    );
 
     // repeating, so not an item start
-    if (j > i) {
-      const repeats = j - i;
+    if (repeated.length > 1) {
       const newLexemeDef =
-        repeats > 2 ? { type: LEXEME_TYPE_HORZ_RULE_START } : undefined;
+        repeated.length > 2 ? { type: LEXEME_TYPE_HORZ_RULE_START } : undefined;
       return {
-        newLexeme: lexeme.repeat(repeats),
-        nextIndex: j,
+        newLexeme: repeated,
+        nextIndex: wsLookahead.nextIndex + repeated.length,
         newLexemeDef,
       };
     }
@@ -114,4 +128,25 @@ export const startingListItemDashStarLookahead = (
       type: LEXEME_TYPE_LIST_ITEM_START,
     },
   };
+};
+
+export const consumeRepeatingChars = (
+  char: string,
+  source: string,
+  start: number,
+  limit = -1
+): string => {
+  let found = 0;
+  let i = start;
+  while (true && (found < limit || limit == -1)) {
+    if (source[i] == char) {
+      found++;
+      i += char.length;
+      continue;
+    }
+
+    break;
+  }
+
+  return char.repeat(found);
 };

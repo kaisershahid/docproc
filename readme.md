@@ -42,7 +42,7 @@ To start, we need to specify the following lexemes:
 - ` ` (space)
 - `**`
 - `_`
-- `\n`
+- `\\n`
 
 Anything that isn't explicitly identified is grouped together and emitted as their own lexemes.
 
@@ -66,7 +66,7 @@ Let's trace how each token changes the state of the parser, starting at the bloc
     - `blockquoteHandler` can accept and is set as current handler
 - ` `, `**`, `blockquote`, `**`
     - all accepted by `blockquoteHandler`
-- `\n`, `\n`
+- `\\n`, `\\n`
     -  blockquote done, no longer current handler
 - `paragraph`
     - `paragraphHandler` can accept and is set as current handler
@@ -93,7 +93,7 @@ Pretty simple so far. Now let's look within the block and see what happens with 
 
 When you turn the document into a string, you get all the pieces back, aseembled from fragment of HTML returned from the different handlers.
 
-That's basically it! You can see it all put together in [readme.example.ts](./readme.example.ts)
+That's basically it! You can see it all put together in [<code>readme.example.ts</code>](./readme.example.ts)
 
 Take a deeper dive:
 

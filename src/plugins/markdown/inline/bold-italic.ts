@@ -33,7 +33,7 @@ export class StrongHandler extends SimpleWrapHandler {
 
 export class EmphasisHandler extends SimpleWrapHandler {
   constructor() {
-    super("*", "<emphasis>", "</emphasis>");
+    super("*", "<em>", "</em>");
   }
 
   cloneInstance(): HandlerInterface<InlineHandlerType> {

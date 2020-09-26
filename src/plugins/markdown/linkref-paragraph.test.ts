@@ -14,7 +14,7 @@ import {
   LinkrefParagraphHandler,
 } from "./linkref-paragraph";
 
-describe.only("plugins.markdown.LinkrefHandler", () => {
+describe("plugins.markdown.LinkrefHandler", () => {
   const subject = new ListHandler();
   const blockManager = new HandlerManager<BlockHandlerType>();
   blockManager.addHandler(subject);

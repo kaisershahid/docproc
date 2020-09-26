@@ -199,7 +199,7 @@ export class Lexer implements LexerInterface {
         newLexeme,
         newLexemeDef,
       }: LexemeLookaheadReturn = def.lookahead
-        ? def.lookahead(content, lexeme, i) ?? {}
+        ? def.lookahead(content, lexeme, i, def) ?? {}
         : {};
       if (nextIndex && nextIndex < i) {
         throw {

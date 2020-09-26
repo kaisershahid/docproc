@@ -7,89 +7,107 @@ import {
 import { isLineEnd } from "../../utils";
 import { BlockBase } from "../../defaults/block-base";
 import { escapeHtml } from "../../utils_/escape-html";
+import { LEXEME_TYPE_WHITESPACE_START } from "./lexdef.lookaheads";
+
+export enum CodeState {
+  start,
+  langtype,
+  in_code,
+  end,
+}
 
 /**
  * Handle multiline <pre/>.
  */
-export class CodeHandler extends BlockBase {
-  opener = "";
-  isOpenerSpace = false;
+export class CodeHandler
+  extends BlockBase
+  implements HandlerInterface<BlockHandlerType> {
+  state: CodeState = CodeState.start;
+  codeType = "";
   lastLex: string = "";
+  lastLexEsc = false;
   buff = "";
-  codeType = "text";
-  codeTypeSet = false;
   lines: string[] = [];
+
+  protected pushLine() {
+    this.lines.push(this.buff);
+    this.buff = "";
+  }
 
   getName() {
     return "code";
   }
 
   canAccept(lexeme: string, def?: LexemeDef) {
-    return lexeme == "```" || lexeme == "    ";
+    return lexeme == "```";
   }
 
   push(lexeme: string, def?: LexemeDef): BlockActions {
     let ret = BlockActions.REJECT;
-    if (this.opener == "") {
-      this.opener = lexeme;
-      this.isOpenerSpace = lexeme[0] != "`";
-      this.codeTypeSet = this.isOpenerSpace;
-      ret = BlockActions.CONTINUE;
-    } else if (isLineEnd(lexeme)) {
-      if (isLineEnd(this.lastLex) && this.isOpenerSpace) {
-        ret = BlockActions.DONE;
-      } else {
-        if (!this.codeTypeSet) {
-          this.codeTypeSet = true;
-          if (this.buff !== "") {
-            this.codeType = this.buff;
-          }
-        } else {
-          this.lines.push(this.buff);
-        }
 
-        this.buff = "";
-        ret = BlockActions.CONTINUE;
-      }
-    } else if (lexeme === "```" && !this.isOpenerSpace) {
-      if (this.buff != "") {
-        this.lines.push(this.buff);
-      }
-      ret = BlockActions.DONE;
-    } else {
-      if (isLineEnd(this.lastLex) && this.isOpenerSpace) {
-        const start = lexeme.substr(0, 4);
-        const rem = lexeme.substr(4);
-        if (start == "    ") {
-          if (rem != "") {
-            this.buff += rem;
-          }
-          ret = BlockActions.CONTINUE;
-        } else {
-          // not idented enough; push remaining buffer and end
-          this.lines.push(this.buff);
-        }
-      } else {
-        this.buff += lexeme;
-        ret = BlockActions.CONTINUE;
-      }
+    if (this.state == CodeState.start) {
+      ret = this.handleStart(lexeme, def);
+    } else if (this.state == CodeState.langtype) {
+      ret = this.handleLangtype(lexeme, def);
+    } else if (this.state == CodeState.in_code) {
+      ret = this.handleInCode(lexeme, def);
+    } else if (this.state == CodeState.end) {
+      ret = this.handleEnd(lexeme, def);
     }
 
     this.lastLex = lexeme;
+    this.lastLexEsc = lexeme == "\\";
     return ret;
+  }
+
+  protected handleStart(lexeme: string, def?: LexemeDef): BlockActions {
+    if (lexeme == "```") {
+      this.state = CodeState.langtype;
+    }
+
+    return BlockActions.CONTINUE;
+  }
+
+  protected handleLangtype(lexeme: string, def?: LexemeDef): BlockActions {
+    if (isLineEnd(lexeme)) {
+      this.state = CodeState.in_code;
+    } else {
+      this.codeType += lexeme.replace(/^\s*/, "").replace(/\s*$/, "");
+    }
+
+    return BlockActions.CONTINUE;
+  }
+
+  protected handleInCode(lexeme: string, def?: LexemeDef): BlockActions {
+    if (isLineEnd(this.lastLex) && lexeme == "```") {
+      this.state = CodeState.end;
+      return BlockActions.DONE;
+    }
+
+    if (isLineEnd(lexeme)) {
+      this.pushLine();
+    } else {
+      this.buff += lexeme;
+    }
+
+    return BlockActions.CONTINUE;
+  }
+
+  protected handleEnd(lexeme: string, def?: LexemeDef): BlockActions {
+    return BlockActions.REJECT;
   }
 
   cloneInstance(): HandlerInterface<BlockHandlerType> {
     return new CodeHandler();
   }
 
-  toString() {
-    // document ended with this block and didn't force last buffer into lines
+  handlerEnd() {
     if (this.buff != "" && !isLineEnd(this.lastLex)) {
-      this.lines.push(this.buff);
-      this.buff = "";
+      this.pushLine();
     }
+  }
 
+  toString() {
     const codeClass =
       "markdown-block-code" + (this.codeType != "" ? "-" + this.codeType : "");
     return (
@@ -97,5 +115,53 @@ export class CodeHandler extends BlockBase {
       escapeHtml(this.lines.join("\n")) +
       "</pre>"
     );
+  }
+}
+
+export class CodeIndentedHandler extends CodeHandler {
+  getName(): string {
+    return "code:indented";
+  }
+
+  canAccept(lexeme: string, def?: LexemeDef): boolean {
+    return lexeme.startsWith("    ");
+  }
+
+  protected handleStart(lexeme: string, def?: LexemeDef): BlockActions {
+    this.buff += lexeme;
+    this.state = CodeState.in_code;
+    return BlockActions.CONTINUE;
+  }
+
+  protected handleInCode(lexeme: string, def?: LexemeDef): BlockActions {
+    if (isLineEnd(lexeme)) {
+      if (isLineEnd(this.lastLex)) {
+        this.state = CodeState.end;
+        return BlockActions.DONE;
+      } else {
+        this.pushLine();
+        return BlockActions.CONTINUE;
+      }
+    }
+
+    if (
+      def?.type == LEXEME_TYPE_WHITESPACE_START &&
+      !lexeme.startsWith("    ")
+    ) {
+      this.state = CodeState.end;
+      return BlockActions.REJECT;
+    }
+
+    this.buff += lexeme;
+    return BlockActions.CONTINUE;
+  }
+
+  protected pushLine() {
+    this.lines.push(this.buff.substr(4));
+    this.buff = "";
+  }
+
+  cloneInstance(): HandlerInterface<BlockHandlerType> {
+    return new CodeIndentedHandler();
   }
 }

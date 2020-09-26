@@ -77,7 +77,6 @@ export class ListHandler extends BlockNestableBase {
   curItem?: ListItemContainer;
 
   canAccept(lexeme: string, def?: LexemeDef): boolean {
-    // console.log(this.id, "canAccept", { lexeme, def });
     return def?.type == LEXEME_TYPE_LIST_ITEM_START;
   }
 
@@ -107,15 +106,12 @@ export class ListHandler extends BlockNestableBase {
    * @param def
    */
   push(lexeme: string, def?: LexemeDef): BlockActions {
-    // console.log(this.id, "push", { lexeme });
     if (this.isItemStart(lexeme, def)) {
-      // console.log(">> listitem");
       this.detectNewLine = false;
       const listStyle = ListHandler.getListStyle(lexeme.replace(/^\s*/, ""));
 
       // different list styles, so terminate this
       // @todo doublecheck this is good logic
-      // console.log("> ", this.listStyle, listStyle);
       if (this.listStyle != "" && this.listStyle != listStyle) {
         return BlockActions.REJECT;
       }
@@ -145,7 +141,6 @@ export class ListHandler extends BlockNestableBase {
         return BlockActions.CONTINUE;
       } else if (this.isLineIndented(lexeme)) {
         // child
-        // console.log(this.id, "child", { partial });
         this.curItem?.push(partial, def);
         return BlockActions.CONTINUE;
       } else {
@@ -163,18 +158,12 @@ export class ListHandler extends BlockNestableBase {
       return BlockActions.CONTINUE;
     } else if (!this.detectNewLine) {
       // continuation of item start line
-      // console.log(this.id, "continuation", { lexeme });
       this.curItem?.push(lexeme, def);
       return BlockActions.CONTINUE;
     } else if (this.isLineIndented(lexeme)) {
       // new line and indented to last item start
       this.detectNewLine = false;
       const partial = lexeme.substr(this.lastIndent.depth);
-      // console.log(this.id, "continuation", {
-      //   partial,
-      //   def,
-      //   last: this.lastIndent,
-      // });
       this.curItem?.push(partial, def);
       return BlockActions.CONTINUE;
     }
