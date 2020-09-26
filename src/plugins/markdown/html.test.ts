@@ -22,10 +22,25 @@ describe.only("plugins.markdown.html", () => {
     registerPlugin(docproc);
 
     it("builds html as expected", () => {
-      docproc.process("<div key='val'>body is **bold**</div>");
-      expect(docproc.toString()).to.equal(
+      const dc = new DocProcessor(docproc.makeContext());
+      dc.process("<div key='val'>body is **bold**</div>");
+      expect(dc.toString()).to.equal(
         "<div key='val'>body is <strong>bold</strong></div>"
       );
+    });
+
+    it("ignores non-block tag", () => {
+      const dc = new DocProcessor(docproc.makeContext());
+      dc.process("<span key='val'>body is **bold**</span>");
+      expect(dc.toString()).to.equal(
+        "<p><span key='val'>body is <strong>bold</strong></span></p>"
+      );
+    });
+
+    it("passes content through for <style> body", () => {
+      const dc = new DocProcessor(docproc.makeContext());
+      dc.process("<style>body is **bold**</style>");
+      expect(dc.toString()).to.equal("<style>body is **bold**</style>");
     });
   });
 });

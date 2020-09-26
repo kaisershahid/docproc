@@ -2,12 +2,40 @@
 
 import { BlockBase } from "../../defaults/block-base";
 import {
+  AnyMap,
   BlockActions,
   BlockHandlerType,
   HandlerInterface,
   LexemeDef,
 } from "../../types";
 import { REGEX_HTML_TAG_UNVALIDATED_START_OPEN } from "./lexdef.lookaheads";
+
+/**
+ * Only these tags enable the HTMLBlockHandler.
+ */
+const BlockTags: AnyMap = {
+  div: "div",
+  p: "p",
+  blockquote: "blockquote",
+  table: "table",
+  aside: "aside",
+  header: "header",
+  footer: "footer",
+  nav: "nav",
+  body: "body",
+  style: "style",
+  script: "script",
+  head: "head",
+};
+
+/**
+ * The body of these tags should not be touched by the inline formatter.
+ */
+const LiteralBodyTags: AnyMap = {
+  head: "head",
+  style: "style",
+  script: "script",
+};
 
 export enum EnclosingTagState {
   start,
@@ -20,8 +48,16 @@ export enum EnclosingTagState {
 export class HtmlBlockHandler
   extends BlockBase
   implements HandlerInterface<BlockHandlerType> {
+  /**
+   * Only handle tags defined in BlockTags.
+   * @param lexeme
+   * @param def
+   */
   canAccept(lexeme: string, def: LexemeDef | undefined): boolean {
-    return REGEX_HTML_TAG_UNVALIDATED_START_OPEN.test(lexeme);
+    return (
+      REGEX_HTML_TAG_UNVALIDATED_START_OPEN.test(lexeme) &&
+      BlockTags[lexeme.substr(1).toLowerCase()]
+    );
   }
 
   cloneInstance(): HandlerInterface<BlockHandlerType> {
@@ -62,6 +98,7 @@ export class HtmlBlockHandler
     return ret;
   }
 
+  tagName = "";
   tagCloseStart = "";
 
   private handleStart(
@@ -70,6 +107,7 @@ export class HtmlBlockHandler
   ): BlockActions {
     // @todo verify lexeme as tag open?
     this.buff.push(lexeme);
+    this.tagName = lexeme.substr(1).toLowerCase();
     this.tagCloseStart = "</" + lexeme.substr(1);
     this.state = EnclosingTagState.tag_starting;
     return BlockActions.CONTINUE;
@@ -96,7 +134,9 @@ export class HtmlBlockHandler
       this.buff.push(lexeme);
       this.state = EnclosingTagState.tag_closing;
     } else {
-      this.inlineFormatter.push(lexeme, def);
+      LiteralBodyTags[this.tagName]
+        ? this.buff.push(lexeme)
+        : this.inlineFormatter.push(lexeme, def);
     }
     return BlockActions.CONTINUE;
   }
