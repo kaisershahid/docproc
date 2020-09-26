@@ -150,3 +150,32 @@ export const consumeRepeatingChars = (
 
   return char.repeat(found);
 };
+
+/**
+ * Unvalidated, loose interpretation of tag start.
+ */
+export const REGEX_HTML_TAG_UNVALIDATED_START = /^(<\/?[^\s]+)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START_OPEN = /^(<[^\s]+)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START_CLOSE = /^(<\/[^\s]+)/;
+export const LEXEME_TYPE_HTML_TAG_START = "html:tag-start";
+
+export const startHtmlTagLookahead = (
+  content: string,
+  lexeme: string,
+  i: number,
+  curDef: LexemeDef
+): LexemeLookaheadReturn | any => {
+  const tagSubstr = content.substr(i - lexeme.length, 20);
+  const tagMatch = tagSubstr.match(REGEX_HTML_TAG_UNVALIDATED_START);
+  if (!tagMatch) {
+    return;
+  }
+
+  return {
+    newLexeme: tagMatch[1],
+    nextIndex: i - lexeme.length + tagMatch[1].length,
+    newLexemeDef: {
+      type: LEXEME_TYPE_HTML_TAG_START,
+    },
+  };
+};
