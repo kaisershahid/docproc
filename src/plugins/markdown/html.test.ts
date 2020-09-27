@@ -42,5 +42,14 @@ describe.only("plugins.markdown.html", () => {
       dc.process("<style>body is **bold**</style>");
       expect(dc.toString()).to.equal("<style>body is **bold**</style>");
     });
+
+    it("ignores markup in attributes", () => {
+      const dc = new DocProcessor(docproc.makeContext());
+      dc.process("<span key='**val**'>body is **bold**</span>");
+      expect(dc.toString()).to.equal(
+        "<p><span key='**val**'>body is <strong>bold</strong></span></p>"
+      );
+    });
   });
+  describe("HtmlTagHandler", () => {});
 });

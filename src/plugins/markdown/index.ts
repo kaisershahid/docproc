@@ -19,6 +19,7 @@ import { CodeHandler as InlineCodeHandler } from "./inline/code";
 import { StrikeHandler } from "./inline/strike";
 import { ImageHandler, LinkHandler } from "./inline/link";
 import { HtmlBlockHandler } from "./html";
+import { HtmlTagHandler } from "./inline/html-tag";
 
 export const registerPlugin = (
   processor: DocProcessor,
@@ -38,6 +39,7 @@ export const registerPlugin = (
   bm.addHandler(new ParagraphHandler());
 
   const im = processor.getInlineManager();
+  im.addHandler(new HtmlTagHandler());
   im.addHandler(new BoldHandler());
   im.addHandler(new ItalicHandler());
   im.addHandler(new StrongHandler());

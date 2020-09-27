@@ -45,6 +45,10 @@ export enum EnclosingTagState {
   tag_closed,
 }
 
+/**
+ * Detects block-level tags and treats its content as a single block. For LiteralBodyTags,
+ * all content is passed through as-is.
+ */
 export class HtmlBlockHandler
   extends BlockBase
   implements HandlerInterface<BlockHandlerType> {

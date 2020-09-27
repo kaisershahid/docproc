@@ -44,6 +44,7 @@ const LEXEME_TYPE_IMG_START = "![";
 const LEXEME_TYPE_PUNCTUATION = ".!?";
 const LEXEME_TYPE_PIPE = "|";
 const LEXEME_TYPE_HTML_TAG = "<html-tag";
+const LEXEME_TYPE_HTML_TAG_INLINE_CLOSE = "<html-tag: />";
 
 const SPECIAL_TOKENS: LexemeDefMap = {
   "\\": { priority: 99, type: LEXEME_TYPE_ESCAPE },
@@ -88,6 +89,7 @@ const SPECIAL_TOKENS: LexemeDefMap = {
   "`": { priority: 2, upTo: 3, type: LEXEME_TYPE_BACKTICK }, // @todo redo this as a lookahead so we only return for ` or ```, not ``
   "=": { priority: 2, upTo: 3, type: LEXEME_TYPE_EQUAL },
   ">": { priority: 2, upTo: 5, type: LEXEME_TYPE_GREATER }, // could do more?
+  "/>": { priority: 2, type: LEXEME_TYPE_HTML_TAG_INLINE_CLOSE },
   "#": { priority: 2, upTo: 6, type: LEXEME_TYPE_HASH },
   "(": { priority: 2, type: LEXEME_TYPE_PARENTHESIS },
   ")": { priority: 2, type: LEXEME_TYPE_PARENTHESIS },

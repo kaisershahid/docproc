@@ -154,9 +154,9 @@ export const consumeRepeatingChars = (
 /**
  * Unvalidated, loose interpretation of tag start.
  */
-export const REGEX_HTML_TAG_UNVALIDATED_START = /^(<\/?[^\s>]+)/;
-export const REGEX_HTML_TAG_UNVALIDATED_START_OPEN = /^(<[^\s>]+)/;
-export const REGEX_HTML_TAG_UNVALIDATED_START_CLOSE = /^(<\/[^\s>]+)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START = /^(<\/?\w[\w:]+)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START_OPEN = /^(<\w[\w:]+)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START_CLOSE = /^(<\/\w[\w:]+)/;
 export const LEXEME_TYPE_HTML_TAG_START = "html:tag-start";
 
 export const startHtmlTagLookahead = (
