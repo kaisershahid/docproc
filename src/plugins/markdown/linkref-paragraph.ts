@@ -53,6 +53,8 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
     return "linkref-paragraph";
   }
 
+  protected lexStart = "[";
+
   inGoodShape = true;
   lastLexEsc = false;
 
@@ -63,7 +65,7 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
   refState: LinkrefState = LinkrefState.start;
 
   canAccept(lexeme: string): boolean {
-    return lexeme == "[";
+    return lexeme == this.lexStart;
   }
 
   push(lexeme: string, def?: LexemeDef): BlockActions {
@@ -149,7 +151,7 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
    */
   handlerEnd() {
     // @todo figure out why ` && this.refState >= LinkrefState.url_closed` is making this fail
-    if (this.inGoodShape) {
+    if (this.inGoodShape && this.lineBuff.length > 0) {
       addLinkrefToRegistry(this.linkref);
       this.linkrefs.push(this.linkref);
       this.lineBuff = [];
@@ -176,7 +178,7 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
         this.handlerEnd();
       }
 
-      if (lexeme == "[") {
+      if (lexeme == this.lexStart) {
         this.refState = LinkrefState.key_open;
         this.linkref = new Linkref();
         return BlockActions.CONTINUE;

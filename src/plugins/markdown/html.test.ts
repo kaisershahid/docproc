@@ -8,7 +8,7 @@ import exp = require("constants");
 import { registerPlugin } from "./index";
 import doc = Mocha.reporters.doc;
 
-describe.only("plugins.markdown.html", () => {
+describe("plugins.markdown.html", () => {
   describe("lex.commonmark: startHtmlTagLookahead()", () => {
     it("matches start of html tag '<html:body key=val'", () => {
       const lookahead = startHtmlTagLookahead("<html:body key=val", "<", 1, {
