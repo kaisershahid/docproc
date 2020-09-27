@@ -44,7 +44,6 @@ export class InlineStateBuffer implements InlineFormatterInterface {
     } else {
       // 1+ levels deep
       let action = cur.nextAction(lex);
-
       if (actionShouldUseNewHandler(action)) {
         if (this.wasNewHandlerFoundAndPushedForLex(lex, def)) {
           return;
