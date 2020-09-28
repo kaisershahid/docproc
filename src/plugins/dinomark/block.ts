@@ -34,7 +34,7 @@ export class DinoBlockHandler extends LinkrefParagraphHandler {
   }
 
   toString(): string {
-    // @todo execute directives
+    console.log(this.directives);
     return "";
   }
 }

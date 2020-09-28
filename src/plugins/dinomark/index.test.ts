@@ -5,10 +5,14 @@ import doc = Mocha.reporters.doc;
 describe.only("plugins.dinomark.Full Integration Testing", () => {
   const markdown = `# header 1
   
+  [@var-load]: index.test.json
+  
   maps.0.key = [][maps.0.key]
 `;
   const vars = {
-    maps: [{ key: "embedded value" }, { key: "e_v2.0" }],
+    sys: {
+      sourceRoot: __dirname,
+    },
   };
   const docproc = new DocProcessor({ vars });
   require("../markdown").registerPlugin(docproc);

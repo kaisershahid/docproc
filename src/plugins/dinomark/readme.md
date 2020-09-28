@@ -12,7 +12,7 @@ With that in mind, let's look at the extension!
 |syntax                       |target |description
 |---                          |---    |---
 |`[@var]: key (jsonValue)`    |block  |defines a variable `key` with a JSON-encoded value (e.g. `1`, `true`, `[1,"2"]`, etc.)
-|`[@loadvar]: filePath (key)` |block  |attempts to read variables from `filePath` and store them under `key`
+|`[@include-vars]: filePath (key)` |block  |attempts to read variables from `filePath` and store them under `key`
 |`[@include]: filePath`       |block  |dumps content of file into current block.
 |`[@process]: filePath`       |block  |similar to `@include`, except file will be processed before being dumped
 |`[]($key)`                   |inline |outputs value in `$key` or blank strink if undefined.
