@@ -146,7 +146,7 @@ export enum InlineActions {
 }
 
 export interface InlineFormatterInterface {
-  push: (lexeme: string, def?: LexemeDef) => void;
+  push: LexemeConsumer;
 }
 
 export const InlineFormatterDummy: InlineFormatterInterface = {

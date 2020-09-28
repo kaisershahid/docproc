@@ -19,7 +19,7 @@ export const insertBefore = <T>(handler: T, idx: number, handlers: T[]) => {
 
 export const insertAfter = <T>(handler: T, idx: number, handlers: T[]) => {
   if (idx == -1) {
-    return [handler, ...handlers];
+    return [...handlers, handler];
   } else {
     return [
       ...handlers.splice(0, idx + 1),

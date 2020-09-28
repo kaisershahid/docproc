@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { DinoBlockHandler } from "./block";
 
-describe.only("plugins.dinomark", () => {
+describe("plugins.dinomark.block", () => {
   describe("DinoBlockHandler", () => {
     it('extracts [@directive]: text-value ("string")', () => {
       const subject = new DinoBlockHandler();
@@ -27,27 +27,6 @@ describe.only("plugins.dinomark", () => {
         action: "text-value",
         parameters: '"string"',
       });
-    });
-  });
-  describe("DinoInlineHandler", () => {
-    const subject = new DinoBlockHandler();
-    [
-      "[](",
-      "$var",
-      " ",
-      "or",
-      " ",
-      "something",
-      "(",
-      "\\",
-      ")",
-      ")",
-    ].forEach((t) => subject.push(t));
-    subject.handlerEnd();
-    expect(subject.directives[0]).to.deep.equal({
-      directive: "directive",
-      action: "text-value",
-      parameters: '"string"',
     });
   });
 });
