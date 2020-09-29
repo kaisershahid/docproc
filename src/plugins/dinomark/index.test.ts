@@ -5,9 +5,19 @@ import doc = Mocha.reporters.doc;
 describe.only("plugins.dinomark.Full Integration Testing", () => {
   const markdown = `# header 1
   
-  [@var-load]: index.test.json
-  
-  maps.0.key = [][maps.0.key]
+[@var]: newmap (json:{"key": 0, "key2": 2})
+[@var]: newmap.key (5)
+[@include-var]: __test/test.json
+
+newmap.key = [][newmap.key], newmap.key2 = [][newmap.key2],
+maps.0.key = [][page.maps.0.key]
+
+these two includes should preserve the whitespaces between files.
+
+[@include]: __test/include1.md
+[@include]: __test/include2.md
+
+[@process]: __test/include2.md
 `;
   const vars = {
     sys: {
@@ -21,6 +31,18 @@ describe.only("plugins.dinomark.Full Integration Testing", () => {
   docproc.process(markdown);
   const html = docproc.toString();
 
-  expect(html).to.contain("maps.0.key = embedded value");
-  expect(html).to.contain("<h1> header 1</h1>", "parsed h1 not found");
+  it("processes @var and @include-var and outputs variable reference", () => {
+    expect(html).to.contain("newmap.key = 5");
+    expect(html).to.contain("newmap.key2 = 2");
+    expect(html).to.contain("maps.0.key = 5");
+    expect(html).to.contain("<h1> header 1</h1>", "parsed h1 not found");
+  });
+
+  it("processes @include", () => {
+    expect(html).to.contain("include 1 include 2 **bold**");
+  });
+
+  it("processes @process (markdown default)", () => {
+    expect(html).to.contain("<p>include 2 <strong>bold</strong></p>");
+  });
 });

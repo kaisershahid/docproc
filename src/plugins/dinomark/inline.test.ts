@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { DinoInlineHandler, VarReferenceGetter } from "./inline";
+import { DinoInlineHandler } from "./inline";
 import { LinkMode } from "../markdown/inline/link";
 import { DocProcessor } from "../../doc-processor";
+import { VarReferenceGetter } from "./directives.var";
 
 describe("plugins.dinomark.inline", () => {
   describe("VarReferenceGetter", () => {

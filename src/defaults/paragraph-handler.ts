@@ -6,7 +6,7 @@ import {
   InlineFormatterDummy,
   LexemeDef,
 } from "../types";
-import { isLineEnd, isWhitespace } from "../utils";
+import { isLineEnd, isWhitespace, trimString } from "../utils";
 import { NAME_DEFAULT } from "../handler-manager";
 
 /**
@@ -67,6 +67,7 @@ export class ParagraphHandler implements HandlerInterface<BlockHandlerType> {
   }
 
   toString() {
-    return "<p>" + this.inlineFormatter.toString() + "</p>";
+    const content = trimString(this.inlineFormatter.toString());
+    return content != "" ? "<p>" + content + "</p>" : "";
   }
 }

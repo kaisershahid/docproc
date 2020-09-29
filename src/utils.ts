@@ -51,3 +51,6 @@ export const translateEscapedString = (str: string) => {
 
 export const returnUnescapedString = (str: string) =>
   str[0] == "\\" ? translateEscapedString(str) : str;
+
+export const trimString = (str: string): string =>
+  str.replace(/^\s+/, "").replace(/\s+$/, "");

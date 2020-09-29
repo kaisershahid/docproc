@@ -59,6 +59,7 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
   lastLexEsc = false;
 
   linkref: Linkref = dummyLinkref;
+  lastLink?: Linkref;
   linkrefs: Linkref[] = [];
 
   lineBuff: LexemePair[] = [];
@@ -91,9 +92,7 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
     }
 
     this.lineBuff.push({ lexeme, def });
-
     let ret = this.handleStates(lexeme, def);
-
     this.lastLex = lexeme;
     this.lastLexEsc = lexeme[0] == "\\";
     return ret;
@@ -152,8 +151,13 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
   handlerEnd() {
     // @todo figure out why ` && this.refState >= LinkrefState.url_closed` is making this fail
     if (this.inGoodShape && this.lineBuff.length > 0) {
+      if (this.linkref === this.lastLink) {
+        return;
+      }
+
       addLinkrefToRegistry(this.linkref);
       this.linkrefs.push(this.linkref);
+      this.lastLink = this.linkref;
       this.lineBuff = [];
     }
   }
