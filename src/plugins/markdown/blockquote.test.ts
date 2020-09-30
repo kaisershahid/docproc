@@ -28,9 +28,9 @@ describe("plugins.markdown.blocks.paragraph", () => {
     const document = "> block1\n>> block1.1\n> block2";
     docproc.process(document);
     expect(docproc.toString()).to.equal(
-      "<blockquote><p> block1\n</p>\n" +
-        "<blockquote><p> block1.1\n</p></blockquote>\n" +
-        "<p> block2</p></blockquote>"
+      "<blockquote><p>block1</p>\n" +
+        "<blockquote><p>block1.1</p></blockquote>\n" +
+        "<p>block2</p></blockquote>"
     );
   });
 });

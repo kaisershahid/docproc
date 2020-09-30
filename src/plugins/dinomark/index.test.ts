@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { DocProcessor } from "../../doc-processor";
 import doc = Mocha.reporters.doc;
 
-describe.only("plugins.dinomark.Full Integration Testing", () => {
+describe("plugins.dinomark.Full Integration Testing", () => {
   const markdown = `# header 1
   
 [@var]: newmap (json:{"key": 0, "key2": 2})

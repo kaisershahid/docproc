@@ -80,7 +80,7 @@ describe("plugins.markdown.list", () => {
       const docproc = new DocProcessor(docprocBase.makeContext());
       docproc.process("- i1");
       expect(docproc.toString()).to.equal(`<ul>
-<li><p> i1</p></li>
+<li><p>i1</p></li>
 </ul>`);
     });
     it("handles 1 item with text continuing on indent", () => {
@@ -88,7 +88,7 @@ describe("plugins.markdown.list", () => {
       docproc.process("- i1\n  more text");
       expect(docproc.toString()).to.equal(
         `<ul>
-<li><p> i1
+<li><p>i1
  more text</p></li>
 </ul>`
       );
@@ -98,9 +98,8 @@ describe("plugins.markdown.list", () => {
       docproc.process("- i1\n* i2");
       expect(docproc.toString()).to.equal(
         `<ul>
-<li><p> i1
-</p></li>
-<li><p> i2</p></li>
+<li><p>i1</p></li>
+<li><p>i2</p></li>
 </ul>`
       );
     });
@@ -109,11 +108,10 @@ describe("plugins.markdown.list", () => {
       docproc.process("- i1\n1. i2 123.4");
       expect(docproc.toString()).to.equal(
         `<ul>
-<li><p> i1
-</p></li>
+<li><p>i1</p></li>
 </ul>
 <ol>
-<li><p> i2 123.4</p></li>
+<li><p>i2 123.4</p></li>
 </ol>`
       );
     });
@@ -122,10 +120,9 @@ describe("plugins.markdown.list", () => {
       docproc.process("- i1\n  - i1.1");
       expect(docproc.toString()).to.equal(
         `<ul>
-<li><p> i1
-</p>
+<li><p>i1</p>
 <ul>
-<li><p> i1.1</p></li>
+<li><p>i1.1</p></li>
 </ul></li>
 </ul>`
       );
@@ -135,9 +132,8 @@ describe("plugins.markdown.list", () => {
       docproc.process("1. i1\n  > hello");
       expect(docproc.toString()).to.equal(
         `<ol>
-<li><p> i1
-</p>
-<blockquote><p> hello</p></blockquote></li>
+<li><p>i1</p>
+<blockquote><p>hello</p></blockquote></li>
 </ol>`
       );
     });
