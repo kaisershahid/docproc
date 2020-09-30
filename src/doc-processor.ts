@@ -16,10 +16,15 @@ import {
   LexemeDef,
   AnyMap,
   PluginManagerInterface,
+  PluginServicesManagerInterface,
 } from "./types";
 import { InlineStateBuffer } from "./inline/state-buffer";
 import { ParagraphHandler } from "./defaults/paragraph-handler";
-import { getPluginManager, PluginManager } from "./plugins";
+import {
+  getPluginManager,
+  getPluginServicesManager,
+  PluginManager,
+} from "./plugins";
 
 let id = 0;
 
@@ -36,18 +41,28 @@ export class DocProcessor {
   protected blockManager: HandlerManager<BlockHandlerType>;
   protected inlineManager: HandlerManager<InlineHandlerType>;
   protected pluginManager: PluginManagerInterface;
+  protected pluginServicesManager: PluginServicesManagerInterface;
   protected collector: LexemeConsumer;
   protected curHandlerDefers = false;
 
   constructor(context?: DocContext | AnyMap) {
     this.id = ++id;
-    const { lexer, parser, blockManager, inlineManager, vars, pluginManager } =
-      context ?? {};
+    const {
+      lexer,
+      parser,
+      blockManager,
+      inlineManager,
+      vars,
+      pluginManager,
+      pluginServicesManager,
+    } = context ?? {};
     this.lexer = lexer ?? new Lexer();
     this.parser = parser ?? new ParserContext();
     this.blockManager = blockManager ?? new HandlerManager();
     this.inlineManager = inlineManager ?? new HandlerManager();
     this.pluginManager = pluginManager ?? getPluginManager();
+    this.pluginServicesManager =
+      pluginServicesManager ?? getPluginServicesManager();
     this.vars = vars ?? {};
     this.context = this.makeContext();
     this.blockManager.setContext(this.context);
@@ -62,6 +77,7 @@ export class DocProcessor {
       blockManager: this.blockManager,
       inlineManager: this.inlineManager,
       pluginManager: this.pluginManager,
+      pluginServicesManager: this.pluginServicesManager,
       vars: this.vars,
       getInlineFormatter: (): InlineFormatterInterface => {
         return new InlineStateBuffer(context);
@@ -133,6 +149,10 @@ export class DocProcessor {
 
   getPluginManager(): PluginManagerInterface {
     return this.pluginManager;
+  }
+
+  getPluginServiceManager(): PluginServicesManagerInterface {
+    return this.pluginServicesManager;
   }
 
   protected findNewHandler(

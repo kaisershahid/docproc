@@ -192,9 +192,14 @@ export interface PluginManagerInterface {
   ) => DocProcessor;
 }
 
-export interface ProviderManagerInterface {
-  getProvider: <T>(key: string) => T | undefined;
-  addProvider: (key: string, provider: any) => void;
+/**
+ * A registry of services grouped by their plugins. This allows other plugins to extend behaviors of the
+ * plugin's handlers.
+ */
+export interface PluginServicesManagerInterface {
+  addService: (pluginName: string, key: string, provider: any) => void;
+  addServices: (pluginName: string, services: AnyMap) => void;
+  getService: <T>(pluginName: string, key: string) => T | undefined;
 }
 
 /**
@@ -243,5 +248,6 @@ export type DocContext = {
   blockManager: HandlerManagerInterface<BlockHandlerType>;
   inlineManager: HandlerManagerInterface<InlineHandlerType>;
   pluginManager: PluginManagerInterface;
+  pluginServicesManager: PluginServicesManagerInterface;
   getInlineFormatter: () => InlineFormatterInterface;
 };

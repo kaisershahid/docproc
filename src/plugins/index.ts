@@ -3,6 +3,7 @@ import {
   PluginEntry,
   PluginManagerInterface,
   PluginOptions,
+  PluginServicesManagerInterface,
 } from "../types";
 import { DocProcessor } from "../doc-processor";
 
@@ -47,9 +48,34 @@ export class PluginManager implements PluginManagerInterface {
   }
 }
 
+export class PluginServicesManager implements PluginServicesManagerInterface {
+  servicesByPlugins: { [key: string]: AnyMap } = {};
+  addService(pluginName: string, key: string, service: any): void {
+    if (!this.servicesByPlugins[pluginName]) {
+      this.servicesByPlugins[pluginName] = {};
+    }
+
+    this.servicesByPlugins[pluginName][key] = service;
+  }
+
+  addServices(pluginName: string, services: AnyMap): void {
+    for (let key in services) {
+      this.addService(pluginName, key, services[key]);
+    }
+  }
+
+  getService<T>(pluginName: string, key: string): T | undefined {
+    return this.servicesByPlugins[pluginName]?.[key];
+  }
+}
+
 const pluginManager = new PluginManager();
+const pluginServicesManager = new PluginServicesManager();
 
 /**
  * Returns global plugin manager.
  */
 export const getPluginManager = (): PluginManagerInterface => pluginManager;
+
+export const getPluginServicesManager = (): PluginServicesManagerInterface =>
+  pluginServicesManager;

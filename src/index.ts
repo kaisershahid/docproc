@@ -26,4 +26,4 @@ if (!fs.existsSync(filePath)) {
 
 const docproc = getDocProcForFile(filePath);
 docproc.process(fs.readFileSync(filePath).toString());
-// console.log(docproc.toString());
+console.log(docproc.toString());

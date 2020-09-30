@@ -3,7 +3,7 @@ import { PluginOptions } from "../../types";
 import { addToLexer } from "./lexemes";
 import { DinoBlockHandler } from "./block";
 import { DinoInlineHandler } from "./inline";
-import { DirectivesManager, PROVIDER_DINOMARK_DIRECTIVE } from "./directives";
+import { DirectivesManager, DINOMARK_SERVICE_DIRECTIVE } from "./directives";
 import { DirectiveIncludeVars, DirectiveVarSet } from "./directives.var";
 import {
   DirectiveExecute,
@@ -12,8 +12,14 @@ import {
 } from "./directives.include";
 
 export const registerPlugin = (doc: DocProcessor, opts?: PluginOptions) => {
+  const pluginSvc = doc.getPluginServiceManager();
   const directiveManager = new DirectivesManager();
-  doc.vars[PROVIDER_DINOMARK_DIRECTIVE] = directiveManager;
+  doc.vars[DINOMARK_SERVICE_DIRECTIVE] = directiveManager;
+  pluginSvc.addService(
+    "dinomark",
+    DINOMARK_SERVICE_DIRECTIVE,
+    directiveManager
+  );
   directiveManager.addHandler(new DirectiveVarSet(), {
     directive: DirectiveVarSet.DIRECTIVE,
   });
