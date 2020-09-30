@@ -31,6 +31,9 @@ export type DirectiveHandler = {
   invokeDirective: (def: DirectiveDefinition, ctx: DocContext) => any;
 };
 
+export const PROVIDER_DINOMARK_DIRECTIVE =
+  "provider.dinomark.directive-manager";
+
 /**
  * Maps a directive/action to a handler.
  */

@@ -4,9 +4,11 @@ import {
   Linkref,
   LinkrefParagraphHandler,
 } from "../markdown/linkref-paragraph";
-import { DirectiveDefinition, DirectivesManager } from "./directives";
-
-export const KEY_PROVIDER_DIRECTIVE = "provider.dinomark.directive-manager";
+import {
+  DirectiveDefinition,
+  DirectivesManager,
+  PROVIDER_DINOMARK_DIRECTIVE,
+} from "./directives";
 
 export class DinoBlockHandler extends LinkrefParagraphHandler {
   lexStart = DINO_LEX_BLOCK;
@@ -39,7 +41,7 @@ export class DinoBlockHandler extends LinkrefParagraphHandler {
   toString(): string {
     this.handlerEnd();
     const dm: DirectivesManager | undefined = this.context?.vars[
-      KEY_PROVIDER_DIRECTIVE
+      PROVIDER_DINOMARK_DIRECTIVE
     ];
 
     if (!dm) {
