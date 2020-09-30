@@ -22,22 +22,43 @@ export class DirectiveInclude implements DirectiveHandler {
     def: DirectiveDefinition,
     ctx: DocContext,
     filePath: string
-  ) {
+  ): any {
     return fs.readFileSync(filePath).toString();
   }
 }
 
 export class DirectiveProcess extends DirectiveInclude {
-  static readonly DIRECTIVE = "process";
+  static readonly DIRECTIVE: string = "process";
 
   protected processFile(
     def: DirectiveDefinition,
     ctx: DocContext,
     filePath: string
-  ) {
+  ): any {
     const content = fs.readFileSync(filePath).toString();
     const docproc = new DocProcessor(ctx);
     docproc.process(content);
     return docproc.toString();
+  }
+}
+
+export class DirectiveExecute extends DirectiveInclude {
+  static readonly DIRECTIVE: string = "execute";
+
+  protected processFile(
+    def: DirectiveDefinition,
+    ctx: DocContext,
+    filePath: string
+  ): any {
+    try {
+      const retVal = require(filePath).execute(ctx, def);
+      if (retVal !== undefined && retVal !== null) {
+        return retVal;
+      }
+    } catch (e) {
+      // @todo log exception somewhere
+    }
+
+    return "";
   }
 }

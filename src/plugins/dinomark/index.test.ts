@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { DocProcessor } from "../../doc-processor";
 import doc = Mocha.reporters.doc;
 
-describe("plugins.dinomark.Full Integration Testing", () => {
+describe.only("plugins.dinomark.Full Integration Testing", () => {
   const markdown = `# header 1
   
 [@var]: newmap (json:{"key": 0, "key2": 2})
@@ -18,6 +18,8 @@ these two includes should preserve the whitespaces between files.
 [@include]: __test/include2.md
 
 [@process]: __test/include2.md
+
+[@execute]: __test/include.js
 `;
   const vars = {
     sys: {
@@ -44,5 +46,9 @@ these two includes should preserve the whitespaces between files.
 
   it("processes @process (markdown default)", () => {
     expect(html).to.contain("<p>include 2 <strong>bold</strong></p>");
+  });
+
+  it("processes @execute", () => {
+    expect(html).to.contain("\nlook at me executing\n");
   });
 });
