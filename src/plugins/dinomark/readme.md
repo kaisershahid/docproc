@@ -28,11 +28,13 @@ Out of the box, the following are supported:
 The file provided by `filePath` is expected to be a JavaScript file with the following exported member:
 
 ```
-export const execute = (ctx: DocProc, def: DirectiveDefinition): any => {
+export const execute = (ctx: DocProc, def: DirectiveDefinition, curBlock?: HandlerInterface): any => {
 }
 ```
 
 This gives the script full access to context settings. `null` and `undefined` returned values are not outputted.
+
+> `curBlock` not yet supported -- this will be available once inline execution handling is supported
 
 ## Expanding `[@directive]`
 
