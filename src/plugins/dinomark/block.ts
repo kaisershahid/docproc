@@ -1,4 +1,9 @@
-import { BlockHandlerType, DocContext, HandlerInterface } from "../../types";
+import {
+  BlockHandlerType,
+  DocContext,
+  HandlerInterface,
+  PluginServicesManagerInterface,
+} from "../../types";
 import { DINO_LEX_BLOCK } from "./lexemes";
 import {
   Linkref,
@@ -7,7 +12,7 @@ import {
 import {
   DirectiveDefinition,
   DirectivesManager,
-  PROVIDER_DINOMARK_DIRECTIVE,
+  DINOMARK_SERVICE_DIRECTIVE,
 } from "./directives";
 
 export class DinoBlockHandler extends LinkrefParagraphHandler {
@@ -40,9 +45,11 @@ export class DinoBlockHandler extends LinkrefParagraphHandler {
 
   toString(): string {
     this.handlerEnd();
-    const dm: DirectivesManager | undefined = this.context?.vars[
-      PROVIDER_DINOMARK_DIRECTIVE
-    ];
+    const dm: DirectivesManager | undefined = (this.context
+      ?.pluginServicesManager as PluginServicesManagerInterface).getService(
+      "dinomark",
+      DINOMARK_SERVICE_DIRECTIVE
+    );
 
     if (!dm) {
       return "";

@@ -1,4 +1,5 @@
 import { InlineStateBuffer } from "./inline/state-buffer";
+import { DocProcessor } from "./doc-processor";
 
 export type AnyMap = { [key: string]: any };
 export type TypedMap<T> = { [key: string]: T };
@@ -155,13 +156,96 @@ export const InlineFormatterDummy: InlineFormatterInterface = {
   },
 };
 
-// @todo add a plugins option to store registered plugins
-// @todo add a provider map/service to manage services used by plugins
+export type PluginMapping = { name: string; path: string };
+
+export type PluginOptionsMap = { [key: string]: PluginOptions };
+
+/**
+ * Generally kept as a JSON file in your document root, this file contains settings for
+ * plugins as well as other metadata.
+ */
+export type DocumentSettings = AnyMap & {
+  /**
+   * Extended plugins for your doc, mapped as either as an npm package or a relative path.
+   *
+   * ```{name: "markdown", modPath: "./plugins/markdown"}```
+   */
+  plugins: PluginMapping[];
+  /**
+   * Maps a plugin name to custom settings for the plugin.
+   */
+  pluginOptions: PluginOptionsMap;
+};
+
+export type PluginOptions = AnyMap;
+
+export type PluginEntry = (doc: DocProcessor, opts?: PluginOptions) => void;
+
+export interface PluginManagerInterface {
+  register: (name: string, entrypoint: PluginEntry) => void;
+  registerFromModule: (name: string, modPath: string) => void;
+  isAvailable: (name: string) => boolean;
+  attach: (
+    name: string,
+    docproc: DocProcessor,
+    opts?: PluginOptions
+  ) => DocProcessor;
+}
+
+/**
+ * A registry of services grouped by their plugins. This allows other plugins to extend behaviors of the
+ * plugin's handlers.
+ */
+export interface PluginServicesManagerInterface {
+  addService: (pluginName: string, key: string, provider: any) => void;
+  addServices: (pluginName: string, services: AnyMap) => void;
+  getService: <T>(pluginName: string, key: string) => T | undefined;
+}
+
+/**
+ * Baseline input/output context for the document.
+ */
+export type SysSettings = {
+  /**
+   * Metadata for the input document.
+   */
+  doc: {
+    /**
+     * Directory root of doc.
+     */
+    dir: string;
+    /**
+     * Filename of doc.
+     */
+    name: string;
+    /**
+     * `dir + '/' + name`
+     */
+    path: string;
+    /**
+     * Document extension.
+     */
+    ext: string;
+    settingsDir: string;
+    settingsName: string;
+    settings: DocumentSettings;
+  };
+};
+
 export type DocContext = {
+  /**
+   * A globally available map holding dynamic data. Can be read from/written to depending on what loaded plugins allow.
+   */
+  vars:
+    | AnyMap
+    | {
+        sys: SysSettings;
+      };
   lexer: LexerInterface;
-  state: StateInterface;
+  state: StateInterface; // @todo deprecate
   blockManager: HandlerManagerInterface<BlockHandlerType>;
   inlineManager: HandlerManagerInterface<InlineHandlerType>;
-  vars: AnyMap;
+  pluginManager: PluginManagerInterface;
+  pluginServicesManager: PluginServicesManagerInterface;
   getInlineFormatter: () => InlineFormatterInterface;
 };
