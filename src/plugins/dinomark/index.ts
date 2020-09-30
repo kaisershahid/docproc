@@ -1,5 +1,5 @@
 import { DocProcessor } from "../../doc-processor";
-import { PluginOptions } from "../index";
+import { PluginOptions } from "../../types";
 import { addToLexer } from "./lexemes";
 import { DinoBlockHandler } from "./block";
 import { DinoInlineHandler } from "./inline";

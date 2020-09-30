@@ -1,4 +1,4 @@
-import { PluginOptions } from "..";
+import { PluginOptions } from "../../types";
 import { DocProcessor } from "../../doc-processor";
 import { addToLexer } from "./lexdef.commonmark";
 import { BlockquoteHandler } from "./blockquote";
