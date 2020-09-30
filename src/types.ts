@@ -232,8 +232,6 @@ export type SysSettings = {
   };
 };
 
-// @todo add a plugins option to store registered plugins
-// @todo add a provider map/service to manage services used by plugins
 export type DocContext = {
   /**
    * A globally available map holding dynamic data. Can be read from/written to depending on what loaded plugins allow.
