@@ -5,7 +5,11 @@ import { DinoBlockHandler } from "./block";
 import { DinoInlineHandler } from "./inline";
 import { DirectivesManager, PROVIDER_DINOMARK_DIRECTIVE } from "./directives";
 import { DirectiveIncludeVars, DirectiveVarSet } from "./directives.var";
-import { DirectiveInclude, DirectiveProcess } from "./directives.include";
+import {
+  DirectiveExecute,
+  DirectiveInclude,
+  DirectiveProcess,
+} from "./directives.include";
 
 export const registerPlugin = (doc: DocProcessor, opts?: PluginOptions) => {
   const directiveManager = new DirectivesManager();
@@ -21,6 +25,9 @@ export const registerPlugin = (doc: DocProcessor, opts?: PluginOptions) => {
   });
   directiveManager.addHandler(new DirectiveProcess(), {
     directive: DirectiveProcess.DIRECTIVE,
+  });
+  directiveManager.addHandler(new DirectiveExecute(), {
+    directive: DirectiveExecute.DIRECTIVE,
   });
 
   // @todo register directives in opts
