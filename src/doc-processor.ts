@@ -28,7 +28,7 @@ export class DocProcessor {
   protected id: number;
   protected lexer: LexerInterface;
   protected parser: StateInterface;
-  protected vars: AnyMap = {};
+  vars: AnyMap = {};
   protected context: DocContext;
   protected blocks: HandlerInterface<BlockHandlerType>[] = [];
   protected blockManager: HandlerManager<BlockHandlerType>;
@@ -43,7 +43,7 @@ export class DocProcessor {
     this.parser = parser ?? new ParserContext();
     this.blockManager = blockManager ?? new HandlerManager();
     this.inlineManager = inlineManager ?? new HandlerManager();
-    this.vars = vars ?? {};
+    this.vars = vars ?? { sys: {} };
     this.context = this.makeContext();
     this.blockManager.setContext(this.context);
     this.inlineManager.setContext(this.context);

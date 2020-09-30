@@ -146,7 +146,7 @@ export enum InlineActions {
 }
 
 export interface InlineFormatterInterface {
-  push: (lexeme: string, def?: LexemeDef) => void;
+  push: LexemeConsumer;
 }
 
 export const InlineFormatterDummy: InlineFormatterInterface = {
@@ -155,6 +155,8 @@ export const InlineFormatterDummy: InlineFormatterInterface = {
   },
 };
 
+// @todo add a plugins option to store registered plugins
+// @todo add a provider map/service to manage services used by plugins
 export type DocContext = {
   lexer: LexerInterface;
   state: StateInterface;

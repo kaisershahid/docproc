@@ -5,6 +5,7 @@ import {
   InlineActions,
   InlineFormatterInterface,
   InlineHandlerType,
+  LexemeConsumer,
   LexemeDef,
 } from "../../../types";
 import { escapeHtml } from "../../../utils_/escape-html";
@@ -29,16 +30,21 @@ export enum LinkMode {
 }
 
 export class Link {
-  ctx: DocContext;
+  ctx?: DocContext;
   text: InlineFormatterInterface;
   url: InlineFormatterInterface;
   type = LinkType.anchor;
   mode = LinkMode.url;
 
-  constructor(ctx: DocContext) {
-    this.ctx = ctx;
-    this.text = ctx.getInlineFormatter();
-    this.url = ctx.getInlineFormatter();
+  constructor(params: {
+    text: InlineFormatterInterface;
+    url: InlineFormatterInterface;
+    context?: DocContext;
+  }) {
+    const { text, url, context } = params;
+    this.ctx = context;
+    this.text = text;
+    this.url = url;
   }
 
   setToImage() {
@@ -176,10 +182,19 @@ export class BaseLinkHandler extends BaseHandler {
     return ret;
   }
 
+  getNewLinkInstance(): Link {
+    const context = this._context;
+    return new Link({
+      context,
+      text: context?.getInlineFormatter() as InlineFormatterInterface,
+      url: context?.getInlineFormatter() as InlineFormatterInterface,
+    });
+  }
+
   protected handleStart(lexeme: string, def?: LexemeDef): InlineActions {
     if (lexeme == this.opener) {
       this.state = LinkHandlerState.text_open;
-      this.link = new Link(this._context as DocContext);
+      this.link = this.getNewLinkInstance();
       if (this.opener == "![") {
         this.link.setToImage();
       }
