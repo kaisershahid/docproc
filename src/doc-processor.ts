@@ -17,6 +17,7 @@ import {
   AnyMap,
   PluginManagerInterface,
   PluginServicesManagerInterface,
+  DataRegistryInterface,
 } from "./types";
 import { InlineStateBuffer } from "./inline/state-buffer";
 import { ParagraphHandler } from "./defaults/paragraph-handler";
@@ -25,6 +26,7 @@ import {
   getPluginServicesManager,
   PluginManager,
 } from "./plugins";
+import { makeDataRegistry } from "./data-registry";
 
 let id = 0;
 
@@ -42,6 +44,7 @@ export class DocProcessor {
   protected inlineManager: HandlerManager<InlineHandlerType>;
   protected pluginManager: PluginManagerInterface;
   protected pluginServicesManager: PluginServicesManagerInterface;
+  protected dataRegistry: DataRegistryInterface;
   protected collector: LexemeConsumer;
   protected curHandlerDefers = false;
 
@@ -55,6 +58,7 @@ export class DocProcessor {
       vars,
       pluginManager,
       pluginServicesManager,
+      dataRegistry,
     } = context ?? {};
     this.lexer = lexer ?? new Lexer();
     this.parser = parser ?? new ParserContext();
@@ -63,6 +67,7 @@ export class DocProcessor {
     this.pluginManager = pluginManager ?? getPluginManager();
     this.pluginServicesManager =
       pluginServicesManager ?? getPluginServicesManager();
+    this.dataRegistry = dataRegistry ?? makeDataRegistry();
     this.vars = vars ?? {};
     this.context = this.makeContext();
     this.blockManager.setContext(this.context);
@@ -78,6 +83,7 @@ export class DocProcessor {
       inlineManager: this.inlineManager,
       pluginManager: this.pluginManager,
       pluginServicesManager: this.pluginServicesManager,
+      dataRegistry: this.dataRegistry,
       vars: this.vars,
       getInlineFormatter: (): InlineFormatterInterface => {
         return new InlineStateBuffer(context);
@@ -91,11 +97,16 @@ export class DocProcessor {
     // @todo collect char/line info
     // @todo if lexemes immediately after newline are whitespace, buffer first until first non-whitespace
     // @todo if line is blank or entirely whitespace, ignore
+    const endCurrentHandler = () => {
+      const h = this.parser.getCurrentHandler() as HandlerInterface<any>;
+      if (h?.handlerEnd) {
+        h.handlerEnd();
+      }
+      return;
+    };
     return (lexeme, def) => {
       if (lexeme === LEXEME_COMPLETE) {
-        const h = this.parser.getCurrentHandler() as HandlerInterface<any>;
-        if (h?.handlerEnd) h.handlerEnd();
-        return;
+        endCurrentHandler();
       }
 
       // previous lexeme signalled that if there's a better handler for current
@@ -106,6 +117,7 @@ export class DocProcessor {
         if (
           newHandler.getName() != this.parser.getCurrentHandler()?.getName()
         ) {
+          endCurrentHandler();
           newHandler = newHandler.cloneInstance();
           newHandler.setContext(this.context);
           this.blocks.push(newHandler);
@@ -198,7 +210,6 @@ export class DocProcessor {
    * @param def
    */
   push(lex: string, def?: LexemeDef) {
-    // console.log("->>> ", { lex, def });
     this.collector(lex, def);
     return this;
   }

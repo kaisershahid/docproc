@@ -301,6 +301,19 @@ export interface PluginServicesManagerInterface {
 }
 
 /**
+ * Allows handlers to append items to a global data registry, with items being tied to a category.
+ *
+ * For instance, the {@see HeaderHandler} can add each header that it generates as part of `headers`, and another
+ * handler (like table of contents) can use that data to generate its content.
+ */
+export interface DataRegistryInterface {
+  addItem: (category: string, item: AnyMap) => void;
+  addItems: (category: string, items: AnyMap[]) => void;
+  getItems: (category: string) => AnyMap[];
+  count: (category: string) => number;
+}
+
+/**
  * Baseline input/output context for the document. Available as `DocProcContext.vars.sys`.
  */
 export type SysSettings = {
@@ -363,6 +376,10 @@ export type DocProcContext = {
    * Manages plugin services. Defaults to {@see PluginServicesManager}
    */
   pluginServicesManager: PluginServicesManagerInterface;
+  /**
+   * Data registry service.
+   */
+  dataRegistry: DataRegistryInterface;
   /**
    * Creates an instance of an line formatter. Typically called when the handler's `setContext()` method is invoked.
    */
