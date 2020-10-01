@@ -14,24 +14,25 @@ To start, there's a `rootInline` handler, which directly or indirectly wraps all
 ![InlineStateBuffer flow](diagrams/overview/parser-inline.png)
 
 - `push(x)`
-    - if `curLine == rootInline`
+    - if `curLine == rootInline` (1a)
         - find better handler for lexeme. if found:
             1. push as child of `curInline`
             2. set to `curInline`
         - `curLine.push(x)` and wait
     - otherwise, check `curInline.nextAction(x)`
-        - if `REJECT`
+        - if `REJECT` (2a)
             - set `curInline = stack.pop()`
-        - if `REJECT` or `DEFER`
+        - if `REJECT` or `DEFER` (2a)
             - find better handler for lexeme
             - if found,
                 - do `curInline.push(x)` and wait
     - check `curLine.push(x)` (essentially `CONTINUE`)
         - if `REJECT`
-            - set `curInline = stack.pop()`
+            - set `curInline = stack.pop()` (3a)
             - call `push(x)`
         - if `POP`
-            - set `curInline = stack.pop()` and wait
+            - set `curInline = stack.pop()` (3a) and wait
+        - else, wait
 
 After all that, a tree such as the following is produced:
 

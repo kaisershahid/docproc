@@ -103,6 +103,8 @@ That's basically it! You can see it all put together in [<code>readme.example.ts
 
 Take a deeper dive:
 
+- [Lexemes](./docs/lexer.md)
 - [Block ParserContext](./docs/block-parser.md)
 - [Inline ParserContext](./docs/inline-parser.md)
-- [Lexemes](./docs/lexer.md)
+- [Doc Settings](./docs/doc-settings.md)
+- [Plugins](./docs/plugin.md)
