@@ -1,15 +1,15 @@
 import {
   ContextAwareInterface,
-  DocContext,
+  DocProcContext,
   InlineFormatterDummy,
   InlineFormatterInterface,
 } from "../types";
 
 export class BlockBase implements ContextAwareInterface {
-  protected context?: DocContext;
+  protected context?: DocProcContext;
   protected inlineFormatter: InlineFormatterInterface = InlineFormatterDummy;
 
-  setContext(context: DocContext) {
+  setContext(context: DocProcContext) {
     this.context = context;
     this.inlineFormatter = context.getInlineFormatter();
   }

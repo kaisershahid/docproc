@@ -2,7 +2,7 @@ import { BlockNestableBase } from "../../defaults/block-nestable-base";
 import {
   BlockActions,
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   LexemeDef,
 } from "../../types";
@@ -16,10 +16,10 @@ import { DocProcessor } from "../../doc-processor";
 const REGEX_CHECK_INDENT = /^(\s*)(\d+.|-|\*)/;
 
 export class ListItemContainer {
-  context: DocContext;
+  context: DocProcContext;
   id: number;
   subDoc: DocProcessor;
-  constructor(context: DocContext, containerId: number) {
+  constructor(context: DocProcContext, containerId: number) {
     this.context = context;
     this.id = containerId;
     this.subDoc = new DocProcessor(context);
@@ -126,7 +126,10 @@ export class ListHandler extends BlockNestableBase {
 
       // starting list
       if (this.items.length == 0) {
-        const item = new ListItemContainer(this.context as DocContext, this.id);
+        const item = new ListItemContainer(
+          this.context as DocProcContext,
+          this.id
+        );
         this.lastIndent = { ws, depth };
         this.items.push(item);
         this.curItem = item;
@@ -135,7 +138,10 @@ export class ListHandler extends BlockNestableBase {
 
       if (this.lastIndent.ws == ws) {
         // siblings
-        const item = new ListItemContainer(this.context as DocContext, this.id);
+        const item = new ListItemContainer(
+          this.context as DocProcContext,
+          this.id
+        );
         this.items.push(item);
         this.curItem = item;
         return BlockActions.CONTINUE;

@@ -1,6 +1,6 @@
 import { InlineHandlerInterface } from "./index";
 import {
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   HandlerManagerInterface,
   InlineActions,
@@ -24,9 +24,9 @@ export class InlineStateBuffer implements InlineFormatterInterface {
   protected defaultHandler: DefaultParentHandler;
   protected stack: HandlerInterface<InlineHandlerType>[] = [];
   protected handlersByLex: TypedMap<InlineHandlerInterface> = {};
-  protected context: DocContext;
+  protected context: DocProcContext;
 
-  constructor(context: DocContext) {
+  constructor(context: DocProcContext) {
     this.context = context;
     this.manager = context.inlineManager;
     this.defaultHandler = new DefaultParentHandler();
@@ -45,10 +45,12 @@ export class InlineStateBuffer implements InlineFormatterInterface {
       // 1+ levels deep
       let action = cur.nextAction(lex);
       if (actionShouldUseNewHandler(action)) {
+        if (!actionIsDeferred(action)) {
+          cur = this.stack.shift() as InlineHandlerInterface;
+        }
+
         if (this.wasNewHandlerFoundAndPushedForLex(lex, def)) {
           return;
-        } else if (!actionIsDeferred(action)) {
-          cur = this.stack.shift() as InlineHandlerInterface;
         }
       }
 
@@ -65,6 +67,13 @@ export class InlineStateBuffer implements InlineFormatterInterface {
     }
   }
 
+  /**
+   * Attempt to find a new handler for the lexeme. If found, push to stack and return true.
+   * Otherwise, return false.
+   * @param lex
+   * @param def
+   * @protected
+   */
   protected wasNewHandlerFoundAndPushedForLex(
     lex: string,
     def?: LexemeDef
@@ -74,6 +83,7 @@ export class InlineStateBuffer implements InlineFormatterInterface {
       newHandler = newHandler.cloneInstance();
       newHandler.setContext(this.context);
       newHandler.push(lex);
+      // @todo only push to stack if push() returns NEST
       (this.stack[0] as InlineHandlerInterface).addChild(newHandler);
       this.stack.unshift(newHandler);
       return true;

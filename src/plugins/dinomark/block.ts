@@ -1,6 +1,6 @@
 import {
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   PluginServicesManagerInterface,
 } from "../../types";
@@ -57,7 +57,7 @@ export class DinoBlockHandler extends LinkrefParagraphHandler {
 
     const buff: any[] = [];
     this.directives.forEach((d) => {
-      buff.push(dm.invokeDirective(d, this.context as DocContext));
+      buff.push(dm.invokeDirective(d, this.context as DocProcContext));
     });
 
     return buff.join("");

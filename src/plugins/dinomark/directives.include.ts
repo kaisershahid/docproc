@@ -1,5 +1,5 @@
 import { DirectiveDefinition, DirectiveHandler } from "./directives";
-import { DocContext } from "../../types";
+import { DocProcContext } from "../../types";
 import fs from "fs";
 import { VarReferenceAccessor } from "./directives.var";
 import { DocProcessor } from "../../doc-processor";
@@ -7,7 +7,7 @@ import { DocProcessor } from "../../doc-processor";
 export class DirectiveInclude implements DirectiveHandler {
   static readonly DIRECTIVE: string = "include";
 
-  invokeDirective(def: DirectiveDefinition, ctx: DocContext): any {
+  invokeDirective(def: DirectiveDefinition, ctx: DocProcContext): any {
     // @todo support multi-root lookup?
     const rootDir = ctx.vars.sys?.sourceRoot ?? process.cwd();
     const filePath = `${rootDir}/${def.action}`;
@@ -20,7 +20,7 @@ export class DirectiveInclude implements DirectiveHandler {
 
   protected processFile(
     def: DirectiveDefinition,
-    ctx: DocContext,
+    ctx: DocProcContext,
     filePath: string
   ): any {
     return fs.readFileSync(filePath).toString();
@@ -32,7 +32,7 @@ export class DirectiveProcess extends DirectiveInclude {
 
   protected processFile(
     def: DirectiveDefinition,
-    ctx: DocContext,
+    ctx: DocProcContext,
     filePath: string
   ): any {
     const content = fs.readFileSync(filePath).toString();
@@ -47,7 +47,7 @@ export class DirectiveExecute extends DirectiveInclude {
 
   protected processFile(
     def: DirectiveDefinition,
-    ctx: DocContext,
+    ctx: DocProcContext,
     filePath: string
   ): any {
     try {

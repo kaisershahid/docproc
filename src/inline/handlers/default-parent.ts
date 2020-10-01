@@ -1,6 +1,6 @@
 import { InlineHandlerInterface } from "../index";
 import {
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   InlineActions,
   LexemeDef,

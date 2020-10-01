@@ -1,7 +1,7 @@
 import {
   BlockActions,
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   InlineFormatterInterface,
   LexemeDef,
@@ -15,7 +15,7 @@ export class Header {
   level: number;
   formatter: InlineFormatterInterface;
 
-  constructor(level: number, context: DocContext) {
+  constructor(level: number, context: DocProcContext) {
     // @todo use context to register this header for TOC (through some dispatching mechanism)
     this.level = level;
     this.formatter = context.getInlineFormatter();
@@ -76,7 +76,7 @@ export class HeaderHandler extends BlockBase {
   protected pushHeaderStart(lexeme: string, lastLex: string): BlockActions {
     if (lastLex == "" || isLineEnd(lastLex)) {
       const level = lexeme.length;
-      this.headers.push(new Header(level, this.context as DocContext));
+      this.headers.push(new Header(level, this.context as DocProcContext));
     }
 
     return BlockActions.CONTINUE;

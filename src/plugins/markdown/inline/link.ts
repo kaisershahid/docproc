@@ -1,6 +1,6 @@
 import { BaseHandler } from "../../../inline/handlers/base";
 import {
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   InlineActions,
   InlineFormatterInterface,
@@ -30,7 +30,7 @@ export enum LinkMode {
 }
 
 export class Link {
-  ctx?: DocContext;
+  ctx?: DocProcContext;
   text: InlineFormatterInterface;
   url: InlineFormatterInterface;
   type = LinkType.anchor;
@@ -39,7 +39,7 @@ export class Link {
   constructor(params: {
     text: InlineFormatterInterface;
     url: InlineFormatterInterface;
-    context?: DocContext;
+    context?: DocProcContext;
   }) {
     const { text, url, context } = params;
     this.ctx = context;

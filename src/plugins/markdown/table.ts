@@ -1,7 +1,7 @@
 import {
   BlockActions,
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   InlineFormatterInterface,
   LexemeDef,
@@ -41,11 +41,11 @@ export class TableRow {
 }
 
 export class TableCell {
-  context: DocContext;
+  context: DocProcContext;
   formatter: InlineFormatterInterface;
   tag = "td";
 
-  constructor(context: DocContext) {
+  constructor(context: DocProcContext) {
     this.context = context;
     this.formatter = context.getInlineFormatter();
   }
@@ -123,7 +123,7 @@ export class TableHandler extends BlockBase {
       this.rows.push(row);
     }
 
-    this.curRow().push(new TableCell(this.context as DocContext));
+    this.curRow().push(new TableCell(this.context as DocProcContext));
     return BlockActions.CONTINUE;
   }
 

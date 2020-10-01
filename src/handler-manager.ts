@@ -1,5 +1,5 @@
 import {
-  DocContext,
+  DocProcContext,
   HandlerAddOptions,
   HandlerInterface,
   HandlerManagerInterface,
@@ -34,9 +34,9 @@ export const NAME_DEFAULT = "DEFAULT";
 export class HandlerManager<T> implements HandlerManagerInterface<T> {
   handlers: HandlerInterface<T>[] = [];
   defaultHandler?: HandlerInterface<T>;
-  context?: DocContext;
+  context?: DocProcContext;
 
-  setContext(context: DocContext) {
+  setContext(context: DocProcContext) {
     this.context = context;
     this.handlers.forEach((h) => h.setContext(context));
   }

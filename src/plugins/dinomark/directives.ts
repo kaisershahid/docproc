@@ -5,7 +5,7 @@
  * [@directive]: action (parameters)
  * ```
  */
-import { AnyMap, DocContext, TypedMap } from "../../types";
+import { AnyMap, DocProcContext, TypedMap } from "../../types";
 
 export type DirectiveDefinition = {
   /**
@@ -28,7 +28,7 @@ type LooseContext = { vars?: AnyMap };
  * Executes directive definition and returns a stringable object.
  */
 export type DirectiveHandler = {
-  invokeDirective: (def: DirectiveDefinition, ctx: DocContext) => any;
+  invokeDirective: (def: DirectiveDefinition, ctx: DocProcContext) => any;
 };
 
 export const DINOMARK_SERVICE_DIRECTIVE = "directive-manager";
@@ -56,7 +56,7 @@ export class DirectivesManager implements DirectiveHandler {
    * @param def
    * @param ctx
    */
-  invokeDirective(def: DirectiveDefinition, ctx: DocContext): any {
+  invokeDirective(def: DirectiveDefinition, ctx: DocProcContext): any {
     const key1 = `${def.directive}.${def.action ?? ""}`;
     const key2 = def.directive + ".";
     const handler = this.handlers[key1] ?? this.handlers[key2];

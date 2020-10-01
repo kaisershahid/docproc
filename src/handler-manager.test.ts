@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { HandlerManager } from "./handler-manager";
 import {
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   LexemeConsumer,
   LexemeDef,
@@ -26,7 +26,7 @@ class DummyHandler implements HandlerInterface<BlockHandlerType> {
     return this;
   }
 
-  setContext(context: DocContext) {}
+  setContext(context: DocProcContext) {}
 
   cloneInstance() {
     return this;

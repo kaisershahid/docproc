@@ -1,7 +1,7 @@
 import fs from "fs";
 import {
   AnyMap,
-  DocContext,
+  DocProcContext,
   InlineFormatterInterface,
   LexemeDef,
 } from "../../types";
@@ -55,7 +55,7 @@ export class VarReferenceGetter implements InlineFormatterInterface {
     this.lastEsc = lexeme == "\\";
   }
 
-  resolveValue(ctx: DocContext & any): any {
+  resolveValue(ctx: DocProcContext & any): any {
     let ptr = ctx.vars ?? {};
     let val: any;
     // all but the last key need to be indexed
@@ -77,7 +77,7 @@ export class VarReferenceGetter implements InlineFormatterInterface {
 }
 
 export class VarReferenceAccessor extends VarReferenceGetter {
-  setValue(value: any, ctx: DocContext & any): any {
+  setValue(value: any, ctx: DocProcContext & any): any {
     if (RestrictedRootKeys[this.keys[0] as string]) {
       return;
     }
@@ -102,7 +102,7 @@ export class VarReferenceAccessor extends VarReferenceGetter {
 
 export class DirectiveVarSet implements DirectiveHandler {
   static readonly DIRECTIVE = "var";
-  invokeDirective(def: DirectiveDefinition, ctx: DocContext): any {
+  invokeDirective(def: DirectiveDefinition, ctx: DocProcContext): any {
     const key = def.action;
     const varAccessor = new VarReferenceAccessor(key.split("."));
     let raw: any = def.parameters ?? "";
@@ -118,7 +118,7 @@ export class DirectiveIncludeVars implements DirectiveHandler {
   static readonly DIRECTIVE = "include-var";
   static readonly ACTION_MERGE = "@merge";
 
-  invokeDirective(def: DirectiveDefinition, ctx: DocContext): any {
+  invokeDirective(def: DirectiveDefinition, ctx: DocProcContext): any {
     // @todo support multi-root lookup?
     const rootDir = ctx.vars.sys?.sourceRoot ?? process.cwd();
     const filePath = `${rootDir}/${def.action}`;

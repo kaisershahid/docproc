@@ -1,6 +1,6 @@
 import { InlineHandlerInterface } from "../index";
 import {
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   InlineActions,
   InlineHandlerType,
@@ -10,7 +10,7 @@ import {
 export class BaseHandler implements InlineHandlerInterface {
   private _parent: InlineHandlerInterface | null = null;
   private _children: InlineHandlerInterface[] = [];
-  protected _context?: DocContext;
+  protected _context?: DocProcContext;
   protected words: any[] = [];
 
   constructor() {}
@@ -34,7 +34,7 @@ export class BaseHandler implements InlineHandlerInterface {
     return this;
   }
 
-  setContext(context: DocContext): void {
+  setContext(context: DocProcContext): void {
     this._context = context;
   }
 

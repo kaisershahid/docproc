@@ -1,7 +1,7 @@
 import {
   BlockActions,
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   InlineFormatterDummy,
   LexemeDef,
@@ -15,10 +15,10 @@ import { NAME_DEFAULT } from "../handler-manager";
  */
 export class ParagraphHandler implements HandlerInterface<BlockHandlerType> {
   lastLex: string = "";
-  context?: DocContext;
+  context?: DocProcContext;
   inlineFormatter = InlineFormatterDummy;
 
-  setContext(context: DocContext) {
+  setContext(context: DocProcContext) {
     this.context = context;
     this.inlineFormatter = context.getInlineFormatter();
   }

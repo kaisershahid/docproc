@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import {
+  AnyMap,
   DocumentSettings,
   PluginMapping,
   PluginOptionsMap,
@@ -17,10 +18,12 @@ export type CLIParams = { settingsDir?: string; settingsName?: string };
 export const normalizeDocumentSettings = (settings: any): DocumentSettings => {
   const plugins = settings?.plugins as PluginMapping[];
   const pluginOptions = settings?.pluginOptions as PluginOptionsMap;
+  const metadata = settings?.metadata as AnyMap;
 
   return {
     plugins: plugins ?? [],
     pluginOptions: pluginOptions ?? {},
+    metadata: metadata ?? {},
   };
 };
 
@@ -46,6 +49,7 @@ export const getDocumentSettings = (
 const SUPPORTED_EXTENSIONS: { [key: string]: DocumentSettings } = {
   md: {
     pluginOptions: {},
+    metadata: {},
     plugins: [
       { name: "markdown", path: `${__dirname}/plugins/markdown` },
       { name: "dinomark", path: `${__dirname}/plugins/dinomark` },

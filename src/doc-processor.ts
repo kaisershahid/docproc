@@ -3,7 +3,7 @@ import { Lexer } from "./lexer";
 import { ParserContext } from "./parser-context";
 import {
   BlockActions,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   HandlerManagerInterface,
   LexemeConsumer,
@@ -36,7 +36,7 @@ export class DocProcessor {
   protected lexer: LexerInterface;
   protected parser: StateInterface;
   vars: AnyMap = {};
-  protected context: DocContext;
+  protected context: DocProcContext;
   protected blocks: HandlerInterface<BlockHandlerType>[] = [];
   protected blockManager: HandlerManager<BlockHandlerType>;
   protected inlineManager: HandlerManager<InlineHandlerType>;
@@ -45,7 +45,7 @@ export class DocProcessor {
   protected collector: LexemeConsumer;
   protected curHandlerDefers = false;
 
-  constructor(context?: DocContext | AnyMap) {
+  constructor(context?: DocProcContext | AnyMap) {
     this.id = ++id;
     const {
       lexer,
@@ -70,7 +70,7 @@ export class DocProcessor {
     this.collector = this.makeCollector();
   }
 
-  makeContext(): DocContext {
+  makeContext(): DocProcContext {
     const context = {
       lexer: this.lexer,
       state: this.parser,

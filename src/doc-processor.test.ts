@@ -2,7 +2,7 @@ import { DocProcessor } from "./doc-processor";
 import {
   BlockActions,
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   LexemeDef,
 } from "./types";
@@ -13,7 +13,7 @@ class DummyHandler implements HandlerInterface<BlockHandlerType> {
 
   name = "";
   count = 0;
-  context?: DocContext;
+  context?: DocProcContext;
   accepting: { [key: string]: boolean } = {};
   lexemeDone: string = "\n";
   afterPushQueue: BlockActions[] = [];
@@ -46,7 +46,7 @@ class DummyHandler implements HandlerInterface<BlockHandlerType> {
     return BlockActions.REJECT;
   }
 
-  setContext(context: DocContext) {
+  setContext(context: DocProcContext) {
     this.context = context;
   }
 

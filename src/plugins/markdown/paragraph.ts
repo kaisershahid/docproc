@@ -1,7 +1,7 @@
 import {
   BlockActions,
   BlockHandlerType,
-  DocContext,
+  DocProcContext,
   HandlerInterface,
   LexemeConsumer,
   LexemeDef,

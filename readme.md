@@ -6,7 +6,7 @@ An extensible **doc**ument **proc**essor, suitable for human-friendly markup. Ta
 ts-node src/docproc path/to/your/file
 ```
 
-## Overview
+## Architecture Overview
 
 First, let's talk document structure. Human-readable docs are linear, and they're typically organized in groups (blocks). The blocks themselves contain inline data or sub-blocks.
 
@@ -27,6 +27,8 @@ normal paragraph
 The basic approach to all solid document processors is that they use a lexer-parser pattern to break the doc down into  its smallest part then sequentially put them back together (in our case, as blocks with inline text).
 
 docproc isn't any different there. What docproc aims to do is create a pattern for configuring lexeme detection and block/inline handling. Once you get a sense for how these pieces fit it should make writing your own processor easy.
+
+![High Level Architecture](./docs/diagrams/overview/architecture-high-level.png)
 
 docproc makes no assumption about what you're trying to process, but it does come with a Markdown (CommonMark) plugin and DinoMark plugin, which enhances CommonMark with more dynamic processing capabilities.
 
