@@ -46,7 +46,11 @@ export class Header {
     }
 
     this.content = this.formatter.toString();
-    let norm = this.content.replace(/[^\w-]/, "").toLowerCase();
+    let norm = this.content
+      .replace(/^\s+/g, "")
+      .replace(/\s$/g, "")
+      .replace(/[^\w-]+/g, "-")
+      .toLowerCase();
     this.id = `${norm}-${this.idx}`;
     return this.id;
   }

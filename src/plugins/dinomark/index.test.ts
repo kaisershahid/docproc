@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { DocProcessor } from "../../doc-processor";
-import doc = Mocha.reporters.doc;
 
 describe("plugins.dinomark.Full Integration Testing", () => {
   const markdown = `# header 1
@@ -30,14 +29,20 @@ these two includes should preserve the whitespaces between files.
   require("../markdown").registerPlugin(docproc);
   require("./index").registerPlugin(docproc);
 
-  docproc.process(markdown);
-  const html = docproc.toString();
+  let html = "";
+  before(() => {
+    docproc.process(markdown);
+    html = docproc.toString();
+  });
 
   it("processes @var and @include-var and outputs variable reference", () => {
     expect(html).to.contain("newmap.key = 5");
     expect(html).to.contain("newmap.key2 = 2");
     expect(html).to.contain("maps.0.key = 5");
-    expect(html).to.contain("<h1> header 1</h1>", "parsed h1 not found");
+    expect(html).to.contain(
+      '<h1 id="header-1-1"> header 1</h1>',
+      "parsed h1 not found"
+    );
   });
 
   it("processes @include", () => {

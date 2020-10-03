@@ -23,7 +23,7 @@ describe("plugins.markdown.code", () => {
     const docproc = new DocProcessor(docprocBase.makeContext());
     docproc.process("``` langtype\ncode\n```");
     expect(docproc.toString()).to.equal(
-      `<pre class="markdown-block-code-langtype">code</pre>`
+      `<pre class="markdown-block-code-langtype">code</pre>\n`
     );
   });
   it("handles code with opening spaces", () => {

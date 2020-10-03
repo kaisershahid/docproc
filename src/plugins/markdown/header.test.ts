@@ -11,7 +11,7 @@ import { HorizontalRuleHandler } from "./horizontal-rule";
 import { HEADER_DATA_CATEGORY, HeaderHandler } from "./header";
 import { makeDataRegistry } from "../../data-registry";
 
-describe.only("plugins.markdown.header", () => {
+describe("plugins.markdown.header", () => {
   const subject = new ListHandler();
   const blockManager = new HandlerManager<BlockHandlerType>();
   blockManager.addHandler(subject);
@@ -23,17 +23,19 @@ describe.only("plugins.markdown.header", () => {
   dataRegistry.addItem("@", { initFlag: true });
   const docprocBase = new DocProcessor({ blockManager, lexer, dataRegistry });
 
-  it("handles # header1", () => {
+  it("handles # header1 & special! chars", () => {
     const docproc = new DocProcessor(docprocBase.makeContext());
-    docproc.process("# header1");
+    docproc.process("# header1 & special! chars");
     const html = docproc.toString();
-    expect(html).to.equal(`<h1 id="header1-1"> header1</h1>`);
+    expect(html).to.equal(
+      `<h1 id="header1-special-chars-1"> header1 & special! chars</h1>`
+    );
   });
   it("registers header1 in the data registry", () => {
     const items = dataRegistry.getItems(HEADER_DATA_CATEGORY);
     expect(items[0]).to.deep.equal({
-      id: "header1-1",
-      content: " header1",
+      id: "header1-special-chars-1",
+      content: " header1 & special! chars",
       level: 1,
     });
   });

@@ -1,6 +1,8 @@
 import { expect } from "chai";
 import { InlineHandlerState, StrikeHandler } from "./strike";
 import { InlineActions } from "../../../types";
+import { DocProcessor } from "../../../doc-processor";
+import { InlineStateBuffer } from "../../../inline/state-buffer";
 
 describe("plugins.markdown.inline.StrikeHandler", () => {
   const subject = new StrikeHandler();
@@ -33,5 +35,14 @@ describe("plugins.markdown.inline.StrikeHandler", () => {
   });
   it("builds a strikethrough tag", () => {
     expect(subject.toString()).to.equal("<del>~ab</del>");
+  });
+  it("works well with InlineStateBuffer", () => {
+    const docproc = new DocProcessor();
+    const context = docproc.makeContext();
+    context.inlineManager.addHandler(new StrikeHandler());
+    const inline = context.getInlineFormatter() as InlineStateBuffer;
+    ["hello", "~~", "strike", "~~"].forEach((t) => inline.push(t));
+    const html = inline.toString();
+    expect(html).to.equal("hello<del>strike</del>");
   });
 });

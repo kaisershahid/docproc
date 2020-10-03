@@ -25,7 +25,7 @@ describe("plugins.markdown.html", () => {
       const dc = new DocProcessor(docproc.makeContext());
       dc.process("<div key='val'>body is **bold**</div>");
       expect(dc.toString()).to.equal(
-        "<div key='val'>body is <strong>bold</strong></div>"
+        "<div key='val'>body is <strong>bold</strong></div>\n"
       );
     });
 
@@ -40,7 +40,7 @@ describe("plugins.markdown.html", () => {
     it("passes content through for <style> body", () => {
       const dc = new DocProcessor(docproc.makeContext());
       dc.process("<style>body is **bold**</style>");
-      expect(dc.toString()).to.equal("<style>body is **bold**</style>");
+      expect(dc.toString()).to.equal("<style>body is **bold**</style>\n");
     });
 
     it("ignores markup in attributes", () => {

@@ -46,7 +46,8 @@ export class InlineStateBuffer implements InlineFormatterInterface {
       let action = cur.nextAction(lex);
       if (actionShouldUseNewHandler(action)) {
         if (!actionIsDeferred(action)) {
-          cur = this.stack.shift() as InlineHandlerInterface;
+          this.stack.shift();
+          cur = this.stack[0] as InlineHandlerInterface;
         }
 
         if (this.wasNewHandlerFoundAndPushedForLex(lex, def)) {

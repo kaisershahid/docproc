@@ -5,7 +5,6 @@ import {
   InlineActions,
   InlineFormatterInterface,
   InlineHandlerType,
-  LexemeConsumer,
   LexemeDef,
 } from "../../../types";
 import { escapeHtml } from "../../../utils_/escape-html";
@@ -117,11 +116,8 @@ export class BaseLinkHandler extends BaseHandler {
 
   nextAction(lexeme: string): InlineActions {
     if (this.state == LinkHandlerState.text_open) {
-      if (lexeme !== "]") {
-        return InlineActions.DEFER;
-      } else {
-        return InlineActions.CONTINUE;
-      }
+      // @todo verify we don't need to defer since the link maintains its own inline buffer for text
+      return InlineActions.CONTINUE;
     } else if (
       this.state == LinkHandlerState.text_closed &&
       (lexeme == "[" || lexeme == "(")
@@ -138,6 +134,8 @@ export class BaseLinkHandler extends BaseHandler {
   lastLex = "";
   lastLexEsc = false;
   link: Link | any = {};
+  undoBuffer: any[] = [];
+  isInvalid = true;
 
   /**
    * State transitions overview:
@@ -175,6 +173,10 @@ export class BaseLinkHandler extends BaseHandler {
       case LinkHandlerState.url_closed:
         ret = this.handleUrlClosed(lexeme, def);
         break;
+    }
+
+    if (ret !== InlineActions.REJECT) {
+      this.undoBuffer.push(lexeme);
     }
 
     this.lastLex = lexeme;
@@ -231,8 +233,12 @@ export class BaseLinkHandler extends BaseHandler {
   protected handleUrlOpen(lexeme: string, def?: LexemeDef): InlineActions {
     if (!this.lastLexEsc) {
       if (this.link.mode == LinkMode.url && lexeme == ")") {
+        this.isInvalid = false;
+        this.state = LinkHandlerState.url_closed;
         return InlineActions.POP;
       } else if (this.link.mode == LinkMode.ref && lexeme == "]") {
+        this.isInvalid = false;
+        this.state = LinkHandlerState.url_closed;
         return InlineActions.POP;
       } else if (lexeme != "\\") {
         this.link.url.push(lexeme, def);
@@ -251,6 +257,10 @@ export class BaseLinkHandler extends BaseHandler {
   }
 
   toString() {
+    if (this.isInvalid) {
+      return this.undoBuffer.join("");
+    }
+
     return this.link.toString();
   }
 }

@@ -110,26 +110,21 @@ export class ListHandler extends BlockNestableBase {
       this.detectNewLine = false;
       const listStyle = ListHandler.getListStyle(lexeme.replace(/^\s*/, ""));
 
-      // different list styles, so terminate this
-      // @todo doublecheck this is good logic
-      if (this.listStyle != "" && this.listStyle != listStyle) {
-        return BlockActions.REJECT;
-      }
-
       const depth = lexeme.length;
       const tmp = startingWhitespaceLookahead(lexeme, lexeme, 1);
       const ws = tmp?.newLexeme ?? "";
-      this.listStyle = listStyle;
 
       // if this is a child, the remainder after indent will be pushed to the item container
       let partial = lexeme.substr(ws.length);
 
       // starting list
       if (this.items.length == 0) {
+        this.listStyle = listStyle;
         const item = new ListItemContainer(
           this.context as DocProcContext,
           this.id
         );
+
         this.lastIndent = { ws, depth };
         this.items.push(item);
         this.curItem = item;
@@ -137,6 +132,11 @@ export class ListHandler extends BlockNestableBase {
       }
 
       if (this.lastIndent.ws == ws) {
+        // different list styles, so terminate this
+        if (this.listStyle != "" && this.listStyle != listStyle) {
+          return BlockActions.REJECT;
+        }
+
         // siblings
         const item = new ListItemContainer(
           this.context as DocProcContext,

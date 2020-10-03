@@ -7,6 +7,7 @@ import {
 } from "./link";
 import { DocProcessor } from "../../../doc-processor";
 import { InlineActions } from "../../../types";
+import exp = require("constants");
 
 describe("plugins.markdown.inline.link", () => {
   /**
@@ -40,13 +41,18 @@ describe("plugins.markdown.inline.link", () => {
       expect(actions[3]).to.equal(InlineActions.REJECT);
     });
 
+    it('gracefully aborts link processing on: Google "[my browser name here] developer console"', () => {
+      buildLink(["'", "[", "brackets", "]", " ", "text", "'"]);
+      expect(subject.toString()).to.equal("[brackets]");
+    });
+
     it("produces correct next actions based on state", () => {
       [
         {
           state: LinkHandlerState.text_open,
           lexeme: "a",
-          expect: InlineActions.DEFER,
-          errMessage: "when in text mode and not receiving ], DEFER",
+          expect: InlineActions.CONTINUE,
+          errMessage: "when in text mode and not receiving ], CONTINUE",
         },
         {
           state: LinkHandlerState.text_open,

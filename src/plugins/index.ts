@@ -1,3 +1,4 @@
+import fs from "fs";
 import {
   AnyMap,
   PluginEntry,
@@ -31,8 +32,14 @@ export class PluginManager implements PluginManagerInterface {
       return;
     }
 
+    // give absolute path to user plugins starting with '.'
+    let localModPath: string | undefined;
+    if (modPath[0] == "." && !fs.existsSync(`${__dirname}/../${modPath}`)) {
+      localModPath = `${process.cwd()}/${modPath}`;
+    }
+
     try {
-      this.register(name, require(modPath).registerPlugin);
+      this.register(name, require(localModPath ?? modPath).registerPlugin);
     } catch (e) {
       // @todo report error
       console.error(e);

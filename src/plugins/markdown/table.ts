@@ -6,7 +6,7 @@ import {
   InlineFormatterInterface,
   LexemeDef,
 } from "../../types";
-import { isLineEnd } from "../../utils";
+import { isLineEnd, isWhitespace } from "../../utils";
 import { BlockBase } from "../../defaults/block-base";
 
 export class TableRow {
@@ -98,6 +98,12 @@ export class TableHandler extends BlockBase {
   push(lexeme: string, def?: LexemeDef): BlockActions {
     let ret = BlockActions.REJECT;
     const lineEnd = isLineEnd(lexeme);
+    const lineWs = isWhitespace(lexeme) && !lineEnd;
+
+    // ignore whitespace immediately after newline
+    if (lineWs && this.lastLineEnd) {
+      return BlockActions.CONTINUE;
+    }
 
     if (lexeme == "|") {
       ret = this.handlePipe(def);
@@ -109,6 +115,7 @@ export class TableHandler extends BlockBase {
 
     this.lastLex = lexeme;
     this.lastLineEnd = lineEnd;
+
     return ret;
   }
 
@@ -151,6 +158,7 @@ export class TableHandler extends BlockBase {
         count++;
       }
     });
+
     if (count == this.curRow().cells.length) {
       this.foundHeader = true;
       this.rows.pop();
