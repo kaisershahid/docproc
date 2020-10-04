@@ -5,10 +5,13 @@ import {
   AnyMap,
   BlockActions,
   BlockHandlerType,
+  DocProcContext,
   HandlerInterface,
+  LexemeConsumer,
   LexemeDef,
 } from "../../types";
 import { REGEX_HTML_TAG_UNVALIDATED_START_OPEN } from "./lexdef.lookaheads";
+import { DocProcessor } from "../../doc-processor";
 
 /**
  * Only these tags enable the HTMLBlockHandler.
@@ -37,6 +40,14 @@ const LiteralBodyTags: AnyMap = {
   script: "script",
 };
 
+/**
+ * A type of block tag that supports full Markdown parsing within its body.
+ */
+const ContainerTags: AnyMap = {
+  div: "div",
+  body: "body",
+};
+
 export enum EnclosingTagState {
   start,
   tag_starting,
@@ -46,12 +57,28 @@ export enum EnclosingTagState {
 }
 
 /**
- * Detects block-level tags and treats its content as a single block. For LiteralBodyTags,
- * all content is passed through as-is.
+ * Detects and treats specific HTML tags as block elements, such that all content within the same tag is treated as a
+ * single block, with some caveats:
+ *
+ * - For tags in {@see LiteralBodyTags} like `<style/>`, tag content is passed through
+ * - For tags in {@see ContainerTags} like `<body/>`, content is treated as a sub-document, so that markdown block
+ *   processing continues to apply
+ * - otherwise, content is treated like inline text.
  */
 export class HtmlBlockHandler
   extends BlockBase
   implements HandlerInterface<BlockHandlerType> {
+  pusher: LexemeConsumer;
+  closer: () => void;
+
+  constructor() {
+    super();
+    this.pusher = (lex, def) => {
+      this.buff.push(lex);
+    };
+    this.closer = () => {};
+  }
+
   /**
    * Only handle tags defined in BlockTags.
    * @param lexeme
@@ -102,8 +129,12 @@ export class HtmlBlockHandler
     return ret;
   }
 
+  isContainer = false;
   tagName = "";
+  tagOpenStart = "";
   tagCloseStart = "";
+  // for container tags, ensure content containing same-name tags have a matching close to avoid premature close of container
+  tagsOpen = 0;
 
   private handleStart(
     lexeme: string,
@@ -112,6 +143,7 @@ export class HtmlBlockHandler
     // @todo verify lexeme as tag open?
     this.buff.push(lexeme);
     this.tagName = lexeme.substr(1).toLowerCase();
+    this.tagOpenStart = "<" + this.tagName;
     this.tagCloseStart = "</" + lexeme.substr(1);
     this.state = EnclosingTagState.tag_starting;
     return BlockActions.CONTINUE;
@@ -124,10 +156,39 @@ export class HtmlBlockHandler
     this.buff.push(lexeme);
     if (lexeme == ">") {
       this.state = EnclosingTagState.tag_open;
-      // for now, we're treating everything between open and close as a single block
-      this.buff.push(this.inlineFormatter);
+      if (ContainerTags[this.tagName] !== undefined) {
+        this.setToContainerPush();
+      } else if (LiteralBodyTags[this.tagName] !== undefined) {
+        this.setToPassthroughPush();
+      } else {
+        this.setToInlinePush();
+      }
     }
     return BlockActions.CONTINUE;
+  }
+
+  protected setToContainerPush() {
+    const docproc = new DocProcessor(this.context as DocProcContext);
+    this.pusher = (lexeme: string, def?: LexemeDef): any => {
+      docproc.push(lexeme, def);
+    };
+    this.closer = () => {
+      docproc.complete();
+    };
+    this.buff.push(docproc);
+  }
+
+  protected setToPassthroughPush() {
+    this.pusher = (lexeme: string, def?: LexemeDef): any => {
+      this.buff.push(lexeme, def);
+    };
+  }
+
+  protected setToInlinePush() {
+    this.pusher = (lexeme: string, def?: LexemeDef): any => {
+      this.inlineFormatter.push(lexeme, def);
+    };
+    this.buff.push(this.inlineFormatter);
   }
 
   private handleTagOpen(
@@ -135,12 +196,18 @@ export class HtmlBlockHandler
     def: LexemeDef | undefined
   ): BlockActions {
     if (lexeme === this.tagCloseStart) {
-      this.buff.push(lexeme);
-      this.state = EnclosingTagState.tag_closing;
+      if (this.tagsOpen == 0) {
+        this.buff.push(lexeme);
+        this.state = EnclosingTagState.tag_closing;
+      } else {
+        this.pusher(lexeme, def);
+        this.tagsOpen--;
+      }
     } else {
-      LiteralBodyTags[this.tagName]
-        ? this.buff.push(lexeme)
-        : this.inlineFormatter.push(lexeme, def);
+      if (lexeme.toLowerCase() == this.tagOpenStart) {
+        this.tagsOpen++;
+      }
+      this.pusher(lexeme, def);
     }
     return BlockActions.CONTINUE;
   }

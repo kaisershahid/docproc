@@ -11,5 +11,9 @@ export declare class DirectiveProcess extends DirectiveInclude {
 }
 export declare class DirectiveExecute extends DirectiveInclude {
     static readonly DIRECTIVE: string;
+    static parseParameters(def: DirectiveDefinition): {
+        func: string;
+        parameters: {};
+    };
     protected processFile(def: DirectiveDefinition, ctx: DocProcContext, filePath: string): any;
 }

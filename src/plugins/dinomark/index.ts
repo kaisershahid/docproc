@@ -14,7 +14,6 @@ import {
 export const registerPlugin = (doc: DocProcessor, opts?: PluginOptions) => {
   const pluginSvc = doc.getPluginServiceManager();
   const directiveManager = new DirectivesManager();
-  doc.vars[DINOMARK_SERVICE_DIRECTIVE] = directiveManager;
   pluginSvc.addService(
     "dinomark",
     DINOMARK_SERVICE_DIRECTIVE,

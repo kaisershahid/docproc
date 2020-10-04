@@ -32,6 +32,7 @@ let id = 0;
 
 /**
  * Encapsulates management of lexer, parser, and all handlers.
+ * @todo add eventing support: beforeClose, afterClose
  */
 export class DocProcessor {
   protected id: number;
@@ -167,6 +168,10 @@ export class DocProcessor {
     return this.pluginServicesManager;
   }
 
+  getDataRegistry(): DataRegistryInterface {
+    return this.dataRegistry;
+  }
+
   protected findNewHandler(
     lexeme: string,
     def?: LexemeDef
@@ -214,7 +219,15 @@ export class DocProcessor {
     return this;
   }
 
+  complete() {
+    this.lexer.complete(this.collector);
+  }
+
   toString(): string {
     return this.blocks.join("\n");
+  }
+
+  cloneInstance(): DocProcessor {
+    return new DocProcessor(this.makeContext());
   }
 }

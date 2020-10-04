@@ -16,7 +16,7 @@ export const alphabetLookahead = (
 ) => {
   // move position back -- lexeme may contain an invalid boundary character
   i -= lexeme.length;
-  const match = content.substr(i).match(/([\w]+)/);
+  const match = content.substr(i).match(/([a-zA-Z]+)/);
   if (match) {
     return {
       newLexeme: match[1],

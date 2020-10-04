@@ -65,23 +65,26 @@ export const startingListItemDashStarLookahead = (
   curDef: LexemeDef
 ): LexemeLookaheadReturn | any => {
   const last = content[i - lexeme.length - 1];
+
+  // first thing is check repetitions -- e.g. `**` will never equal `*` (start list) + `*` (emphasis) --
+  if (lexeme[0] == "*" && curDef.upTo) {
+    let repeated = consumeRepeatingChars(
+      lexeme,
+      content,
+      i - lexeme.length,
+      curDef.upTo
+    );
+
+    if (repeated.length > 1) {
+      return {
+        newLexeme: repeated,
+        nextIndex: i - lexeme.length + repeated.length,
+      };
+    }
+  }
+
   // we want either `undefined` or a line end
   if (last !== undefined && !isLineEnd(last)) {
-    if (curDef.upTo) {
-      let repeated = consumeRepeatingChars(
-        lexeme,
-        content,
-        i - lexeme.length,
-        curDef.upTo
-      );
-      if (repeated.length > 1) {
-        return {
-          newLexeme: repeated,
-          nextIndex: i - lexeme.length + repeated.length,
-        };
-      }
-    }
-    return;
   }
 
   // gives us our whitespace indent. if no whitespace found after line end boundary,
@@ -154,9 +157,9 @@ export const consumeRepeatingChars = (
 /**
  * Unvalidated, loose interpretation of tag start.
  */
-export const REGEX_HTML_TAG_UNVALIDATED_START = /^(<\/?\w[\w:]+)/;
-export const REGEX_HTML_TAG_UNVALIDATED_START_OPEN = /^(<\w[\w:]+)/;
-export const REGEX_HTML_TAG_UNVALIDATED_START_CLOSE = /^(<\/\w[\w:]+)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START = /^(<\/?\w[\w:]*)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START_OPEN = /^(<\w[\w:]*)/;
+export const REGEX_HTML_TAG_UNVALIDATED_START_CLOSE = /^(<\/\w[\w:]*)/;
 export const LEXEME_TYPE_HTML_TAG_START = "html:tag-start";
 
 export const startHtmlTagLookahead = (

@@ -71,7 +71,7 @@ const SPECIAL_TOKENS: LexemeDefMap = {
   },
   "*": {
     priority: 2,
-    upTo: 2,
+    upTo: 80,
     type: LEXEME_TYPE_STAR,
     lookahead: startingListItemDashStarLookahead,
   },

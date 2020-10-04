@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import { DocProcessor } from "../../doc-processor";
 
-describe("plugins.dinomark.Full Integration Testing", () => {
-  const markdown = `# header 1
+const markdown = `# header 1
   
 [@var]: newmap (json:{"key": 0, "key2": 2})
 [@var]: newmap.key (5)
@@ -19,7 +18,10 @@ these two includes should preserve the whitespaces between files.
 [@process]: __test/include2.md
 
 [@execute]: __test/include.js
+[@execute]: __test/include.js (altEntry?{"k1":["v1"]})
 `;
+
+describe("plugins.dinomark.Full Integration Testing", () => {
   const vars = {
     sys: {
       sourceRoot: __dirname,
@@ -55,5 +57,9 @@ these two includes should preserve the whitespaces between files.
 
   it("processes @execute", () => {
     expect(html).to.contain("\nlook at me executing\n");
+  });
+
+  it("processes @execute with altEntry", () => {
+    expect(html).to.contain('altEntry::{"k1":["v1"]');
   });
 });

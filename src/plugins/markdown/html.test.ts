@@ -21,12 +21,31 @@ describe("plugins.markdown.html", () => {
     const docproc = new DocProcessor();
     registerPlugin(docproc);
 
-    it("builds html as expected", () => {
+    it("builds html as expected with <p/>", () => {
       const dc = new DocProcessor(docproc.makeContext());
-      dc.process("<div key='val'>body is **bold**</div>");
+      dc.process("<p key='val'>body is **bold**</p>");
       expect(dc.toString()).to.equal(
-        "<div key='val'>body is <strong>bold</strong></div>\n"
+        "<p key='val'>body is <strong>bold</strong></p>\n"
       );
+    });
+
+    it("builds html as expected with <div/> (container)", () => {
+      const dc = new DocProcessor(docproc.makeContext());
+      dc.process("<div key='val'>body is **bold**\n\n> blockquote</div>");
+      const html = dc.toString();
+      expect(html).to.equal(`<div key='val'><p>body is <strong>bold</strong></p>
+<blockquote><p>blockquote</p></blockquote></div>
+`);
+    });
+
+    it("container tag properly tracks nested tags of same name", () => {
+      const dc = new DocProcessor(docproc.makeContext());
+      dc.process("<div key='val'>goodbye <div>hello</div> </div>");
+      const html = dc.toString();
+      expect(html).to.equal(`<div key='val'><p>goodbye</p>
+<div><p>hello</p></div>
+</div>
+`);
     });
 
     it("ignores non-block tag", () => {

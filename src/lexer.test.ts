@@ -18,7 +18,7 @@ describe("Lexer", () => {
 
   describe("baseline lexing", () => {
     [
-      { str: "abc123", exp: ["abc123"] },
+      { str: "abc123", exp: ["abc", "123"] },
       { str: "abc 123", exp: ["abc", " ", "123"] },
     ].forEach(({ str, exp }) => {
       it(`detects words and number: ${str}`, () => {
@@ -30,7 +30,7 @@ describe("Lexer", () => {
     it("handles boundaries around alpha-numeric strings", () => {
       subject.reset();
       subject.lex("abc\n123\n>abc123", collector);
-      expect(tokens).to.deep.equal(["abc", "\n", "123", "\n>", "abc123"]);
+      expect(tokens).to.deep.equal(["abc", "\n", "123", "\n>", "abc", "123"]);
     });
   });
 

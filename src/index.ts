@@ -7,16 +7,6 @@
  */
 import fs from "fs";
 import { getDocProcForFile } from "./cli";
-// import { DocProcessor } from "./doc-processor";
-// import { registerPlugin } from "./plugins/markdown";
-//
-// const docproc = new DocProcessor();
-// const plugins = docproc.getPluginManager();
-//
-// plugins.registerFromModule("markdown", "./plugins/markdown");
-// plugins.registerFromModule("dinomark", "./plugins/dinomark");
-// plugins.attach("markdown", docproc);
-// plugins.attach("dinomark", docproc);
 
 const filePath = process.argv[2];
 if (!fs.existsSync(filePath)) {
@@ -26,4 +16,4 @@ if (!fs.existsSync(filePath)) {
 
 const docproc = getDocProcForFile(filePath);
 docproc.process(fs.readFileSync(filePath).toString());
-console.log(docproc.toString());
+process.stdout.write(docproc.toString());

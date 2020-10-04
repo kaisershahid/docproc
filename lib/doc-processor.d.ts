@@ -40,4 +40,5 @@ export declare class DocProcessor {
      */
     push(lex: string, def?: LexemeDef): this;
     toString(): string;
+    cloneInstance(): DocProcessor;
 }

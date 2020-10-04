@@ -38,7 +38,7 @@ describe("plugins.markdown.Full Integration Test", () => {
     const html = subject.toString();
     const expectedFragments = [
       "<th>header1 </th>",
-      "<th><i>header2_ </i></th>", // @todo fix this!
+      "<th><i>header2</i> </th>",
       "<th><strong>header3</strong></th>",
       "<td>row1.1  </td>",
       "<td><code>row1.2</code>  </td>",
@@ -81,5 +81,12 @@ describe("plugins.markdown.Full Integration Test", () => {
     expect(root("ul ol").html()).to.contain(
       "<li><p>ordered 1</p></li>\n<li><p>ordered 2</p></li>"
     );
+  });
+
+  it("parses a 'real' document'", () => {
+    subject.process(getMarkdown("what-is-programming"));
+    const html = subject.toString();
+    expect(html).to.contain("<i>code.file</i><br/>");
+    expect(html).to.contain("<p><strong>Computers are not smart</strong>.");
   });
 });
