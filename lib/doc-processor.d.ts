@@ -2,6 +2,7 @@ import { HandlerManager } from "./handler-manager";
 import { DocProcContext, HandlerInterface, HandlerManagerInterface, LexemeConsumer, LexerInterface, StateInterface, BlockHandlerType, InlineHandlerType, LexemeDef, AnyMap, PluginManagerInterface, PluginServicesManagerInterface, DataRegistryInterface } from "./types";
 /**
  * Encapsulates management of lexer, parser, and all handlers.
+ * @todo add eventing support: beforeClose, afterClose
  */
 export declare class DocProcessor {
     protected id: number;
@@ -25,6 +26,7 @@ export declare class DocProcessor {
     getInlineManager(): HandlerManagerInterface<InlineHandlerType>;
     getPluginManager(): PluginManagerInterface;
     getPluginServiceManager(): PluginServicesManagerInterface;
+    getDataRegistry(): DataRegistryInterface;
     protected findNewHandler(lexeme: string, def?: LexemeDef): HandlerInterface<BlockHandlerType>;
     protected setNewHandler(lexeme: string, def?: LexemeDef): void;
     /**
@@ -39,6 +41,7 @@ export declare class DocProcessor {
      * @param def
      */
     push(lex: string, def?: LexemeDef): this;
+    complete(): void;
     toString(): string;
     cloneInstance(): DocProcessor;
 }
