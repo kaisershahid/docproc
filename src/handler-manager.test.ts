@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { HandlerManager } from "./handler-manager";
+import { HandlerManager, insertAfter, insertBefore } from "./handler-manager";
 import {
   BlockHandlerType,
   DocProcContext,
@@ -34,6 +34,17 @@ class DummyHandler implements HandlerInterface<BlockHandlerType> {
 }
 
 describe("HandlerManager", () => {
+  it("insertBefore properly splices array", () => {
+    const arr = ["a", "b", "c"];
+    const newArr = insertBefore("d", 1, arr);
+    expect(newArr).to.deep.equal(["a", "d", "b", "c"]);
+  });
+  it("insertAfter properly splices array", () => {
+    const arr = ["a", "b", "c"];
+    const newArr = insertAfter("d", 1, arr);
+    expect(newArr).to.deep.equal(["a", "b", "d", "c"]);
+  });
+
   const subject = new HandlerManager();
   subject.addHandler(
     new DummyHandler("first") as HandlerInterface<BlockHandlerType>
