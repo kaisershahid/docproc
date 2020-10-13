@@ -97,14 +97,14 @@ Pretty simple so far. Now let's look within the block and see what happens with 
     - `italicHandler` is popped
     - stack: `[]`
 
-When you turn the document into a string, you get all the pieces back, aseembled from fragment of HTML returned from the different handlers.
+When you turn the document into a string, you get all the pieces back, assembled from fragments of HTML returned from the different handlers.
 
 That's basically it! You can see it all put together in [<code>readme.example.ts</code>](./readme.example.ts)
 
 Take a deeper dive:
 
 - [Lexemes](./docs/lexer.md)
-- [Block ParserContext](./docs/block-parser.md)
-- [Inline ParserContext](./docs/inline-parser.md)
+- [Block Parser](./docs/block-parser.md)
+- [Inline Parser](./docs/inline-parser.md)
 - [Doc Settings](./docs/doc-settings.md)
 - [Plugins](./docs/plugin.md)
