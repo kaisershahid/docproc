@@ -146,7 +146,7 @@ export class DocProcessor {
           );
         }
       } else if (result == BlockActions.REORDER && curHandler?.modifyBlocks) {
-        this.blocks = curHandler.modifyBlocks(this.blocks);
+        this.blocks = curHandler.modifyBlocks([...this.blocks]);
         this.parser.setCurrentHandler(undefined);
       }
     };

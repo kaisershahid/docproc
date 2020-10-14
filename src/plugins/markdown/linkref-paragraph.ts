@@ -73,8 +73,10 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
     if (isLineEnd(lexeme)) {
       if (isLineEnd(this.lastLex)) {
         this.lineBuff = [];
+        this.handlerEnd();
         return BlockActions.DONE;
       } else {
+        this.handlerEnd();
         this.refState = LinkrefState.start;
         this.lastLex = lexeme;
         this.lastLexEsc = false;
@@ -116,6 +118,7 @@ export class LinkrefParagraphHandler extends ParagraphHandler {
    */
   protected handleStates(lexeme: string, def?: LexemeDef): BlockActions {
     let ret: BlockActions = BlockActions.REJECT;
+    const lstate = this.refState;
     switch (this.refState) {
       case LinkrefState.start:
         ret = this.handleStart(lexeme, def);

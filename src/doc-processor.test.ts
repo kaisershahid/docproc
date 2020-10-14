@@ -124,7 +124,7 @@ describe("DocProcessor", () => {
     // @todo expect
   });
 
-  it.only("allows block reordering through BlockActions.REORDER", () => {
+  it("allows block reordering through BlockActions.REORDER", () => {
     const subject = new DocProcessor();
     subject.getLexer().mergeLexemes({
       "#": { priority: 1 },

@@ -28,11 +28,11 @@ describe("plugins.dinomark.Full Integration Testing", () => {
     },
   };
   const docproc = new DocProcessor({ vars });
-  require("../markdown").registerPlugin(docproc);
-  require("./index").registerPlugin(docproc);
-
   let html = "";
+
   before(() => {
+    require("../markdown").registerPlugin(docproc);
+    require("./index").registerPlugin(docproc);
     docproc.process(markdown);
     html = docproc.toString();
   });
@@ -60,6 +60,6 @@ describe("plugins.dinomark.Full Integration Testing", () => {
   });
 
   it("processes @execute with altEntry", () => {
-    expect(html).to.contain('altEntry::{"k1":["v1"]');
+    expect(html).to.contain('altEntry::{"k1":["v1"]}');
   });
 });
