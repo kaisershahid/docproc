@@ -81,7 +81,7 @@ class ReorderHandler extends DummyHandler {
     }
   }
 
-  reorderBlocks(
+  modifyBlocks(
     blocks: HandlerInterface<BlockHandlerType>[]
   ): HandlerInterface<BlockHandlerType>[] {
     this.blocks.push(blocks.shift());

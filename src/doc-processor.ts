@@ -145,8 +145,8 @@ export class DocProcessor {
             `cannot find a default blockHandler. unable to process lexeme: ${lexeme} (${def})`
           );
         }
-      } else if (result == BlockActions.REORDER && curHandler?.reorderBlocks) {
-        this.blocks = curHandler.reorderBlocks(this.blocks);
+      } else if (result == BlockActions.REORDER && curHandler?.modifyBlocks) {
+        this.blocks = curHandler.modifyBlocks(this.blocks);
         this.parser.setCurrentHandler(undefined);
       }
     };

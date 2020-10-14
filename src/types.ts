@@ -140,7 +140,7 @@ export interface HandlerInterface<T extends GenericHandlerType>
    * Allows block to manipulate the blocks before it. This allows for doing things like capturing output of blocks
    * and storing them in a variable.
    */
-  reorderBlocks?: (blocks: HandlerInterface<T>[]) => HandlerInterface<T>[];
+  modifyBlocks?: (blocks: HandlerInterface<T>[]) => HandlerInterface<T>[];
   /**
    * If available, this method will be called when the document ends to allow for any cleanup
    * of the last handler. This generally is needed when the document doesn't terminate with
