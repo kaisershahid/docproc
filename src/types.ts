@@ -116,6 +116,10 @@ export class GenericHandlerType {}
 export class BlockHandlerType extends GenericHandlerType {}
 export class InlineHandlerType extends GenericHandlerType {}
 
+/**
+ * Acts as a block of data that accepts/rejects lexemes. Can act as simple as a string buffer or as complex as
+ * a state machine.
+ */
 export interface HandlerInterface<T extends GenericHandlerType>
   extends ContextAwareInterface {
   /**
@@ -132,6 +136,11 @@ export interface HandlerInterface<T extends GenericHandlerType>
    * Gives the handler a lexeme. Handler can either consume or reject it.
    */
   push: LexemeConsumer;
+  /**
+   * Allows block to manipulate the blocks before it. This allows for doing things like capturing output of blocks
+   * and storing them in a variable.
+   */
+  reorderBlocks?: (blocks: HandlerInterface<T>[]) => HandlerInterface<T>[];
   /**
    * If available, this method will be called when the document ends to allow for any cleanup
    * of the last handler. This generally is needed when the document doesn't terminate with
@@ -164,6 +173,11 @@ export enum BlockActions {
    * Active block rejects the current lexeme (retry with another handler) and will no longer accept new ones.
    */
   REJECT = "reject",
+  /**
+   * Allows current block to manipulate processed blocks before it by calling handler's `reorderBlocks()` method if it exists.
+   * If method does not exist, gets treated as `DONE`.
+   */
+  REORDER = "reorder",
 }
 
 /**
