@@ -31,7 +31,7 @@ hello. this block should be captured.
 capture = [][testCapture]
 `;
 
-describe.only("plugins.dinomark.Full Integration Testing", () => {
+describe("plugins.dinomark.Full Integration Testing", () => {
   const vars = {
     sys: {
       sourceRoot: __dirname,
