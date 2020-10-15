@@ -81,7 +81,8 @@ export class DinoBlockHandler extends LinkrefParagraphHandler {
       ((this.getHandlerForLastDirective() as DirectiveHandler)
         .modifyBlocks as Function)(
         blocks,
-        this.directives[this.directives.length - 1]
+        this.directives[this.directives.length - 1],
+        this.context as DocProcContext
       ) ?? blocks
     );
   }

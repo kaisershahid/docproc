@@ -19,9 +19,19 @@ these two includes should preserve the whitespaces between files.
 
 [@execute]: __test/include.js
 [@execute]: __test/include.js (altEntry?{"k1":["v1"]})
+
+[@capture]: testCapture
+
+hello. this block should be captured.
+
+> this blockquote too should be captured.
+
+[@end-capture]
+
+capture = [][testCapture]
 `;
 
-describe("plugins.dinomark.Full Integration Testing", () => {
+describe.only("plugins.dinomark.Full Integration Testing", () => {
   const vars = {
     sys: {
       sourceRoot: __dirname,
@@ -61,5 +71,11 @@ describe("plugins.dinomark.Full Integration Testing", () => {
 
   it("processes @execute with altEntry", () => {
     expect(html).to.contain('altEntry::{"k1":["v1"]}');
+  });
+
+  it("processes @capture and @end-capture", () => {
+    expect(html).to
+      .contain(`<p>capture = <p>hello. this block should be captured.</p>
+<blockquote><p>this blockquote too should be captured.</p></blockquote></p>`);
   });
 });

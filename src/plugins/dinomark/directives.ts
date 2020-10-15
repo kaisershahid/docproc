@@ -37,7 +37,8 @@ export type DirectiveHandler = {
   invokeDirective: (def: DirectiveDefinition, ctx: DocProcContext) => any;
   modifyBlocks?: (
     blocks: HandlerInterface<BlockHandlerType>[],
-    def: DirectiveDefinition
+    def: DirectiveDefinition,
+    context: DocProcContext
   ) => HandlerInterface<BlockHandlerType>[];
 };
 

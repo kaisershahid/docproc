@@ -62,7 +62,8 @@ describe("plugins.dinomark.block", () => {
         invokeDirective(def: DirectiveDefinition, ctx: DocProcContext): any {},
         modifyBlocks(
           blocks: HandlerInterface<BlockHandlerType>[],
-          def
+          def,
+          context
         ): HandlerInterface<BlockHandlerType>[] {
           const lastBlock = blocks.pop();
           return [...blocks, new BlockDecorationWrapper(lastBlock, ">", "<")];
