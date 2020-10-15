@@ -19,7 +19,9 @@ describe("plugins.markdown.html", () => {
   });
   describe("HtmlBlockHandler", () => {
     const docproc = new DocProcessor();
-    registerPlugin(docproc);
+    before(() => {
+      registerPlugin(docproc);
+    });
 
     it("builds html as expected with <p/>", () => {
       const dc = new DocProcessor(docproc.makeContext());

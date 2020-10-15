@@ -75,7 +75,7 @@ export class DinoInlineHandler extends BaseLinkHandler {
   }
 
   toString(): string {
-    return this.link.url.resolveValue(this._context);
+    return `${this.link.url.resolveValue(this._context)}`;
   }
 
   cloneInstance(): HandlerInterface<InlineHandlerType> {

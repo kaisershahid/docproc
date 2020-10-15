@@ -10,6 +10,10 @@ import {
   DirectiveInclude,
   DirectiveProcess,
 } from "./directives.include";
+import {
+  DirectiveCaptureEnd,
+  DirectiveCaptureStart,
+} from "./directive-handlers/capture";
 
 export const registerPlugin = (doc: DocProcessor, opts?: PluginOptions) => {
   const pluginSvc = doc.getPluginServiceManager();
@@ -33,6 +37,12 @@ export const registerPlugin = (doc: DocProcessor, opts?: PluginOptions) => {
   });
   directiveManager.addHandler(new DirectiveExecute(), {
     directive: DirectiveExecute.DIRECTIVE,
+  });
+  directiveManager.addHandler(new DirectiveCaptureStart(), {
+    directive: DirectiveCaptureStart.DIRECTIVE,
+  });
+  directiveManager.addHandler(new DirectiveCaptureEnd(), {
+    directive: DirectiveCaptureEnd.DIRECTIVE,
   });
 
   // @todo register directives in opts

@@ -24,7 +24,7 @@ export const RestrictedRootKeys: AnyMap = {
  * - `key.subkey` gets translated as `['key', 'subkey']'
  * - `key.subkey with \.` gets translated as `['key', 'subkey with .']`
  *
- * Some root keys are write-protected by default -- see TODO for list.
+ * Some root keys are write-protected by default -- see {@see RestrictedRootKeys} for list.
  */
 export class VarReferenceGetter implements InlineFormatterInterface {
   keys: any[] = [""];
@@ -97,6 +97,16 @@ export class VarReferenceAccessor extends VarReferenceGetter {
 
     ptr[last] = value;
     return value;
+  }
+
+  static setVarInContext(
+    varName: string,
+    value: any,
+    context: DocProcContext
+  ): VarReferenceAccessor {
+    const acc = new VarReferenceAccessor(varName.split("."));
+    acc.setValue(value, context);
+    return acc;
   }
 }
 

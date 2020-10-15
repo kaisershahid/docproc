@@ -5,7 +5,13 @@
  * [@directive]: action (parameters)
  * ```
  */
-import { AnyMap, DocProcContext, TypedMap } from "../../types";
+import {
+  AnyMap,
+  BlockHandlerType,
+  DocProcContext,
+  HandlerInterface,
+  TypedMap,
+} from "../../types";
 
 export type DirectiveDefinition = {
   /**
@@ -29,6 +35,11 @@ type LooseContext = { vars?: AnyMap };
  */
 export type DirectiveHandler = {
   invokeDirective: (def: DirectiveDefinition, ctx: DocProcContext) => any;
+  modifyBlocks?: (
+    blocks: HandlerInterface<BlockHandlerType>[],
+    def: DirectiveDefinition,
+    context: DocProcContext
+  ) => HandlerInterface<BlockHandlerType>[];
 };
 
 export const DINOMARK_SERVICE_DIRECTIVE = "directive-manager";
@@ -51,15 +62,18 @@ export class DirectivesManager implements DirectiveHandler {
     return this;
   }
 
+  getHandler(def: DirectiveDefinition): DirectiveHandler | undefined {
+    const key1 = `${def.directive}.${def.action ?? ""}`;
+    const key2 = def.directive + ".";
+    return this.handlers[key1] ?? this.handlers[key2];
+  }
+
   /**
    * Finds either the directive/action or directive handler for the given definition.
    * @param def
    * @param ctx
    */
   invokeDirective(def: DirectiveDefinition, ctx: DocProcContext): any {
-    const key1 = `${def.directive}.${def.action ?? ""}`;
-    const key2 = def.directive + ".";
-    const handler = this.handlers[key1] ?? this.handlers[key2];
-    return handler?.invokeDirective(def, ctx);
+    return this.getHandler(def)?.invokeDirective(def, ctx);
   }
 }

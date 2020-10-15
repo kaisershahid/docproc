@@ -10,9 +10,9 @@ export const insertBefore = <T>(handler: T, idx: number, handlers: T[]) => {
     return [handler, ...handlers];
   } else {
     return [
-      ...handlers.splice(0, idx),
+      ...handlers.slice(0, idx),
       handler,
-      ...handlers.splice(idx, handlers.length),
+      ...handlers.slice(idx, handlers.length),
     ];
   }
 };
@@ -22,9 +22,9 @@ export const insertAfter = <T>(handler: T, idx: number, handlers: T[]) => {
     return [...handlers, handler];
   } else {
     return [
-      ...handlers.splice(0, idx + 1),
+      ...handlers.slice(0, idx + 1),
       handler,
-      ...handlers.splice(idx + 1, handlers.length),
+      ...handlers.slice(idx + 1, handlers.length),
     ];
   }
 };

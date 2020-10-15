@@ -126,7 +126,8 @@ export class DocProcessor {
         }
       }
 
-      if (!this.parser.getCurrentHandler()) {
+      const curHandler = this.parser.getCurrentHandler();
+      if (!curHandler) {
         this.setNewHandler(lexeme, def);
       }
 
@@ -144,6 +145,9 @@ export class DocProcessor {
             `cannot find a default blockHandler. unable to process lexeme: ${lexeme} (${def})`
           );
         }
+      } else if (result == BlockActions.REORDER && curHandler?.modifyBlocks) {
+        this.blocks = curHandler.modifyBlocks([...this.blocks]);
+        this.parser.setCurrentHandler(undefined);
       }
     };
   }

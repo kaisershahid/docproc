@@ -13,6 +13,8 @@ With that in mind, let's look at the extension!
 
 Out of the box, the following are supported:
 
+### Block
+
 |syntax                       |target |description
 |---                          |---    |---
 |`[@var]: key (jsonValue)`    |block  |defines a variable `key` with a JSON-encoded value (e.g. `1`, `true`, `[1,"2"]`, etc.)
@@ -20,6 +22,13 @@ Out of the box, the following are supported:
 |`[@include]: filePath`       |block  |dumps content of file into current block.
 |`[@process]: filePath (opts)`|block  |similar to `@include`, except file will be processed before being included. `opts` (TBD) allows you to pass special instructions, such as input or output format.
 |`[@execute]: filePath (func)`|block  |runs a script! see below
+|`[@capture]: varName`        |block  |starts capture of output for all blocks after this, stored in var `varName`
+|`[@end-capture]:`            |block  |ends capturing of blocks 
+
+### Inline
+
+|syntax                       |target |description
+|---                          |---    |---
 |`[][var.key]`                |inline |outputs value nested under `var.key` or blank string if undefined
 |`[](expression)`             |inline |(future) interprets and executes expression.
 

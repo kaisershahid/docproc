@@ -180,7 +180,7 @@ export class HtmlBlockHandler
 
   protected setToPassthroughPush() {
     this.pusher = (lexeme: string, def?: LexemeDef): any => {
-      this.buff.push(lexeme, def);
+      this.buff.push(lexeme);
     };
   }
 
