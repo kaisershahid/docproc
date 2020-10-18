@@ -3,7 +3,7 @@ echo "> set tag"
 for tag in `git tag`; do
   echo $tag
 done
-echo "< enter tag"
+echo "< enter tag (omit 'v')"
 read tag
 echo "> tag=$tag"
 
@@ -22,12 +22,16 @@ if [ "" = "$releaseOneLiner" ]; then
   exit 1
 fi
 
-echo "# release: $tag ($releaseOneLiner)"
-
-npm version $tag
+echo "# tag: $tag"
+echo "# one-liner: $releaseOneLiner"
+echo "? is this correct? Y/n"
+read prompt
+if [ "n" = $prompt ] || [ "N" = $prompt ]; then
+  exit 1
+fi
 
 echo "- testing" && npm run test && \
 echo "- packing" && npm run prepack && \
 echo "- committing lib" && git add lib package.json && \
-echo "- tagging $tag" && git commit lib -m "- pack & release: $tag" && \
-git tag -a $tag -m "${releaseOneLiner}"
+echo "- tagging $tag" && git commit lib -m "- pack & release: (v$tag) $releaseOneLiner" && \
+npm version $tag
