@@ -5,6 +5,7 @@ import {
   DocumentSettings,
   PluginMapping,
   PluginOptionsMap,
+  SourcePathContext,
   SysSettings,
 } from "./types";
 import { getPluginManager } from "./plugins";
@@ -57,6 +58,20 @@ const SUPPORTED_EXTENSIONS: { [key: string]: DocumentSettings } = {
   },
 };
 
+export const parseFilePath = (filePath: string): SourcePathContext => {
+  const parts = filePath.split("/");
+  const baseName = parts.pop() as string;
+  const extParts = baseName.split(".");
+  const ext = extParts.pop() ?? "";
+  return {
+    filePath,
+    basePath: parts.join("/"),
+    baseName,
+    baseNameNoExt: extParts.join("."),
+    ext,
+  };
+};
+
 /**
  * Generates the document processor instance and:
  *
@@ -69,7 +84,8 @@ const SUPPORTED_EXTENSIONS: { [key: string]: DocumentSettings } = {
  * @param params
  */
 export const getDocProcForFile = (filePath: string, params?: CLIParams) => {
-  const ext = filePath.split(".").pop() ?? "";
+  const sourceContext = parseFilePath(filePath);
+  const { ext } = sourceContext;
   if (!SUPPORTED_EXTENSIONS[ext]) {
     throw new Error(`the extension '${ext}' is not supported`);
   }
@@ -78,31 +94,25 @@ export const getDocProcForFile = (filePath: string, params?: CLIParams) => {
   }
 
   const vars = {
-    sys: makeSysSettings(filePath, ext, params),
+    sys: makeSysSettings(sourceContext, params),
   };
   // console.log("SYS", vars.sys);
 
   const docproc = new DocProcessor({ vars });
   loadBaseAndExtendedPlugins(docproc, vars.sys);
-  return docproc;
+  return { docproc, sourceContext };
 };
 
 export const makeSysSettings = (
-  filePath: string,
-  ext: string,
+  sourceContext: SourcePathContext,
   params?: CLIParams
 ): SysSettings => {
+  const { filePath, ext } = sourceContext;
   const absPath = path.resolve(filePath);
-  const fileContext = {
-    dir: path.dirname(absPath),
-    name: path.basename(absPath),
-    path: absPath,
-    ext,
-  };
 
   // create file/dir context for settings
   const settingsContext = {
-    settingsDir: params?.settingsDir ?? fileContext.dir,
+    settingsDir: params?.settingsDir ?? sourceContext.basePath,
     settingsName: params?.settingsName ?? DOCUMENT_SETTINGS_NAME,
   };
 
@@ -114,7 +124,7 @@ export const makeSysSettings = (
   );
 
   return {
-    doc: { ...fileContext, ...settingsContext, settings },
+    doc: { ...sourceContext, ...settingsContext, settings },
   };
 };
 

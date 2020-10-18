@@ -3,7 +3,7 @@
 An extensible **doc**ument **proc**essor, suitable for human-friendly markup. Take it for a drive with your Markdown document of choice:
 
 ```
-ts-node src/docproc path/to/your/file
+ts-node src/index path/to/your/file
 ```
 
 ## Architecture Overview
