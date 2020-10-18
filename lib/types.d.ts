@@ -292,6 +292,13 @@ export interface DataRegistryInterface {
     getItems: (category: string) => AnyMap[];
     count: (category: string) => number;
 }
+export declare type SourcePathContext = {
+    filePath: string;
+    basePath: string;
+    baseName: string;
+    baseNameNoExt: string;
+    ext: string;
+};
 /**
  * Baseline input/output context for the document. Available as `DocProcContext.vars.sys`.
  */
@@ -299,23 +306,7 @@ export declare type SysSettings = {
     /**
      * Metadata for the input document.
      */
-    doc: {
-        /**
-         * Directory root of doc.
-         */
-        dir: string;
-        /**
-         * Filename of doc.
-         */
-        name: string;
-        /**
-         * `dir + '/' + name`
-         */
-        path: string;
-        /**
-         * Document extension.
-         */
-        ext: string;
+    doc: SourcePathContext & {
         settingsDir: string;
         settingsName: string;
         settings: DocumentSettings;
