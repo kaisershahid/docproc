@@ -24,8 +24,10 @@ fi
 
 echo "# release: $tag ($releaseOneLiner)"
 
+npm version $tag
+
 echo "- testing" && npm run test && \
 echo "- packing" && npm run prepack && \
-echo "- committing lib" && git add lib && \
+echo "- committing lib" && git add lib package.json && \
 echo "- tagging $tag" && git commit lib -m "- pack & release: $tag" && \
 git tag -a $tag -m "${releaseOneLiner}"
