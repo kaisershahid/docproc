@@ -106,6 +106,10 @@ export declare class BlockHandlerType extends GenericHandlerType {
 }
 export declare class InlineHandlerType extends GenericHandlerType {
 }
+/**
+ * Acts as a block of data that accepts/rejects lexemes. Can act as simple as a string buffer or as complex as
+ * a state machine.
+ */
 export interface HandlerInterface<T extends GenericHandlerType> extends ContextAwareInterface {
     /**
      * A unique, human-friendy name for the handler. Used to position and prioritize other handlers.
@@ -121,6 +125,11 @@ export interface HandlerInterface<T extends GenericHandlerType> extends ContextA
      * Gives the handler a lexeme. Handler can either consume or reject it.
      */
     push: LexemeConsumer;
+    /**
+     * Allows block to manipulate the blocks before it. This allows for doing things like capturing output of blocks
+     * and storing them in a variable.
+     */
+    modifyBlocks?: (blocks: HandlerInterface<T>[]) => HandlerInterface<T>[];
     /**
      * If available, this method will be called when the document ends to allow for any cleanup
      * of the last handler. This generally is needed when the document doesn't terminate with
@@ -151,7 +160,12 @@ export declare enum BlockActions {
     /**
      * Active block rejects the current lexeme (retry with another handler) and will no longer accept new ones.
      */
-    REJECT = "reject"
+    REJECT = "reject",
+    /**
+     * Allows current block to manipulate processed blocks before it by calling handler's `reorderBlocks()` method if it exists.
+     * If method does not exist, gets treated as `DONE`.
+     */
+    REORDER = "reorder"
 }
 /**
  * Positional arguments for where to insert a new handler.
@@ -278,6 +292,13 @@ export interface DataRegistryInterface {
     getItems: (category: string) => AnyMap[];
     count: (category: string) => number;
 }
+export declare type SourcePathContext = {
+    filePath: string;
+    basePath: string;
+    baseName: string;
+    baseNameNoExt: string;
+    ext: string;
+};
 /**
  * Baseline input/output context for the document. Available as `DocProcContext.vars.sys`.
  */
@@ -285,23 +306,7 @@ export declare type SysSettings = {
     /**
      * Metadata for the input document.
      */
-    doc: {
-        /**
-         * Directory root of doc.
-         */
-        dir: string;
-        /**
-         * Filename of doc.
-         */
-        name: string;
-        /**
-         * `dir + '/' + name`
-         */
-        path: string;
-        /**
-         * Document extension.
-         */
-        ext: string;
+    doc: SourcePathContext & {
         settingsDir: string;
         settingsName: string;
         settings: DocumentSettings;

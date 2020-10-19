@@ -3,6 +3,7 @@
 	"scripts": {
 		"test": "mocha --recursive --require ts-node/register '{src,tests}/**/*.test.ts'",
 		"prepack": "tsc",
+		"build": "source build-release.sh",
 		"process": "ts-node src/index"
 	},
 	"main": "index.js",
@@ -22,5 +23,6 @@
 		"cheerio": "^1.0.0-rc.3",
 		"mocha": "^8.1.1",
 		"prettier": "^2.0.5"
-	}
+	},
+	"version": "0.8.8"
 }

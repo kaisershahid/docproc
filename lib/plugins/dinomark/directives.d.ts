@@ -5,7 +5,7 @@
  * [@directive]: action (parameters)
  * ```
  */
-import { DocProcContext, TypedMap } from "../../types";
+import { BlockHandlerType, DocProcContext, HandlerInterface, TypedMap } from "../../types";
 export declare type DirectiveDefinition = {
     /**
      * The name of the directive handler (e.g. `var`, `include-vars`).
@@ -25,6 +25,7 @@ export declare type DirectiveDefinition = {
  */
 export declare type DirectiveHandler = {
     invokeDirective: (def: DirectiveDefinition, ctx: DocProcContext) => any;
+    modifyBlocks?: (blocks: HandlerInterface<BlockHandlerType>[], def: DirectiveDefinition, context: DocProcContext) => HandlerInterface<BlockHandlerType>[];
 };
 export declare const DINOMARK_SERVICE_DIRECTIVE = "directive-manager";
 /**
@@ -36,6 +37,7 @@ export declare class DirectivesManager implements DirectiveHandler {
         directive: string;
         action?: string;
     }): this;
+    getHandler(def: DirectiveDefinition): DirectiveHandler | undefined;
     /**
      * Finds either the directive/action or directive handler for the given definition.
      * @param def

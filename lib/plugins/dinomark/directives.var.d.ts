@@ -11,7 +11,7 @@ export declare const RestrictedRootKeys: AnyMap;
  * - `key.subkey` gets translated as `['key', 'subkey']'
  * - `key.subkey with \.` gets translated as `['key', 'subkey with .']`
  *
- * Some root keys are write-protected by default -- see TODO for list.
+ * Some root keys are write-protected by default -- see {@see RestrictedRootKeys} for list.
  */
 export declare class VarReferenceGetter implements InlineFormatterInterface {
     keys: any[];
@@ -28,6 +28,7 @@ export declare class VarReferenceGetter implements InlineFormatterInterface {
 }
 export declare class VarReferenceAccessor extends VarReferenceGetter {
     setValue(value: any, ctx: DocProcContext & any): any;
+    static setVarInContext(varName: string, value: any, context: DocProcContext): VarReferenceAccessor;
 }
 export declare class DirectiveVarSet implements DirectiveHandler {
     static readonly DIRECTIVE = "var";
