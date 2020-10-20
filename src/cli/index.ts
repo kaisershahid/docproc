@@ -7,10 +7,9 @@ import {
   PluginOptionsMap,
   SourcePathContext,
   SysSettings,
-} from "./types";
-import { getPluginManager } from "./plugins";
-import { DocProcessor } from "./doc-processor";
-import set = Reflect.set;
+} from "../types";
+import { getPluginManager } from "../plugins";
+import { DocProcessor } from "../doc-processor";
 
 export const DOCUMENT_SETTINGS_NAME = ".docproc.json";
 
@@ -52,8 +51,8 @@ const SUPPORTED_EXTENSIONS: { [key: string]: DocumentSettings } = {
     pluginOptions: {},
     metadata: {},
     plugins: [
-      { name: "markdown", path: `${__dirname}/plugins/markdown` },
-      { name: "dinomark", path: `${__dirname}/plugins/dinomark` },
+      { name: "markdown", path: `${__dirname}/../plugins/markdown` },
+      { name: "dinomark", path: `${__dirname}/../plugins/dinomark` },
     ],
   },
 };
