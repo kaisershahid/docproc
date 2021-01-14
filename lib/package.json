@@ -1,5 +1,5 @@
 {
-    "name": "prettymd",
+    "name": "docuproc",
     "scripts": {
         "test": "mocha --recursive --require ts-node/register '{src,tests}/**/*.test.ts'",
         "prepack": "tsc",
