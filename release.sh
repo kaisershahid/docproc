@@ -32,4 +32,4 @@ fi
 
 echo "- tag" && git tag -a v$tag -m "$releaseOneLiner" && \
 echo "- push to git" && git push --tags origin && \
-echo "- prepack & publish" && npm prepack && npm publish
+echo "- prepack & publish" && npm publish --access public
