@@ -1,5 +1,5 @@
 {
-    "name": "prettymd",
+    "name": "docuproc",
     "scripts": {
         "test": "mocha --recursive --require ts-node/register '{src,tests}/**/*.test.ts'",
         "prepack": "tsc",
@@ -26,6 +26,6 @@
         "mocha": "^8.1.1",
         "prettier": "^2.0.5"
     },
-    "version": "0.8.9",
+    "version": "0.8.10",
     "license": " GNU GPLv3"
 }
