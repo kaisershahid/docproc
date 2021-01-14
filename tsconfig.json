@@ -13,7 +13,7 @@
 		"isolatedModules": true,
 		"jsx": "preserve",
 	  	"module": "commonjs",
-		"outDir": "./lib"
+		"outDir": "./dist"
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["src/tests", "src/**/*.test.ts"]

@@ -1,5 +1,6 @@
 tmp
 tmp.*
 node_modules
+lib
 dist
 .idea

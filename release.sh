@@ -30,8 +30,6 @@ if [ "n" = $prompt ] || [ "N" = $prompt ]; then
   exit 1
 fi
 
-echo "- testing" && npm run test && \
-echo "- packing" && npm run prepack && \
-echo "- committing lib" && git add lib package.json && \
-echo "- tagging $tag" && git commit lib -m "- pack & release: (v$tag) $releaseOneLiner" && \
-npm version $tag
+echo "- tag" && git tag -a v$tag -m "$releaseOneLiner" && \
+echo "- push to git" && git push --tags origin && \
+echo "- prepack & publish" && npm prepack && npm publish
