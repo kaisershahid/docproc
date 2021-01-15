@@ -4,7 +4,7 @@
     "test": "mocha --recursive --require ts-node/register '{src,tests}/**/*.test.ts'",
     "prepack": "npx webpack",
     "release": "source release.sh",
-    "process": "ts-node src/index"
+    "process": "ts-node src/cli/bin"
   },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
