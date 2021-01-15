@@ -1,19 +1,20 @@
 {
 	"compilerOptions": {
 		"target": "es2019",
+		"module": "CommonJS",
 		"lib": ["es2019", "dom", "dom.iterable"],
 		"allowJs": true,
 		"skipLibCheck": true,
 		"strict": true,
-	  	"declaration": true,
+		  "declaration": true,
+		  "sourceMap": true,
 		"forceConsistentCasingInFileNames": true,
 		"esModuleInterop": true,
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"jsx": "preserve",
-	  	"module": "commonjs",
-		"outDir": "./dist"
+		"outDir": "./dist",
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["src/tests", "src/**/*.test.ts"]
