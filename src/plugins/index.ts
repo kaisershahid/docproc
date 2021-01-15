@@ -44,6 +44,8 @@ export class PluginManager implements PluginManagerInterface {
 	 *
 	 * - `registerPlugin: PluginEntry`
 	 *
+	 * **Note**: make sure your custom modules don't have a name matching the standard plugins, since the standard plugins by that name will be used if the modPath can't be resolved
+	 *
 	 * @param name
 	 * @param modPath
 	 */
@@ -54,7 +56,7 @@ export class PluginManager implements PluginManagerInterface {
 
 		// give absolute path to user plugins starting with '.'
 		let localModPath: string | undefined;
-		if (modPath[0] == "." && !fs.existsSync(`${__dirname}/../${modPath}`)) {
+		if (modPath[0] == "." && !fs.existsSync(`${__dirname}/${modPath}`)) {
 			localModPath = `${process.cwd()}/${modPath}`;
 		}
 
@@ -64,8 +66,13 @@ export class PluginManager implements PluginManagerInterface {
 				require(localModPath ?? modPath).registerPlugin
 			);
 		} catch (e) {
-			// @todo report error
-			console.error(e);
+			// fallback when running
+			try {
+				this.register(name, require(`./${name}/index`).registerPlugin);
+			} catch (f) {
+				// @todo report error
+				console.error(f);
+			}
 		}
 	}
 

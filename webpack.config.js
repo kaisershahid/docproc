@@ -12,6 +12,7 @@ function generateConfig(opts) {
 			library: "docproc",
 			libraryTarget: "umd",
 			umdNamedDefine: true,
+			globalObject: "this",
 		},
 		resolve: {
 			extensions: [".ts", ".js"],

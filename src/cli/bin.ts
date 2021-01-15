@@ -29,5 +29,5 @@ docproc.process(fs.readFileSync(filePath).toString());
 const outDir = args.output_dir ?? sourceContext.basePath;
 const outName = args.output ?? sourceContext.baseNameNoExt + ".html";
 const fileOut = `${outDir ? outDir + "/" : ""}${outName}`;
-fs.writeFileSync(fileOut, docproc.toString());
+fs.writeFileSync(fileOut, docproc.getString());
 console.log("> out:", fileOut);
