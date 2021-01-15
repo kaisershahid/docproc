@@ -1,33 +1,10 @@
-/**
- * Processes an input file and outputs to console. Currently only supports Markdown.
- *
- * ```
- * ts-node src/index [filePath]
- * ```
- */
-import fs from "fs";
-import path from "path";
-import { getDocProcForFile } from "./cli";
-import argParser from "./cli/arg-parser";
+import { loadPluginsForExt } from "./plugins/index";
+import { DocProcessor } from "./doc-processor";
 
-const args = argParser.parse_args(process.argv.slice(2));
-console.log(args);
-const filePath = args.input;
-if (!fs.existsSync(filePath)) {
-  console.error("could not find", filePath);
-  process.exit(1);
-}
+export const getMarkdownInstance = (): DocProcessor => {
+	const docproc = new DocProcessor();
+	loadPluginsForExt({ docproc, ext: "md" });
+	return docproc;
+};
 
-console.log("<  in:", filePath);
-
-const fileParts = filePath.split(".");
-const ext = fileParts.pop();
-const fileBase = fileParts.join(".");
-const { docproc, sourceContext } = getDocProcForFile(filePath);
-docproc.process(fs.readFileSync(filePath).toString());
-
-const outDir = args.output_dir ?? sourceContext.basePath;
-const outName = args.output ?? sourceContext.baseNameNoExt + ".html";
-const fileOut = `${outDir ? outDir + "/" : ""}${outName}`;
-fs.writeFileSync(fileOut, docproc.toString());
-console.log("> out:", fileOut);
+export default DocProcessor;

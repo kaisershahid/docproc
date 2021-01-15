@@ -2,12 +2,12 @@
  * Processes an input file and outputs to console. Currently only supports Markdown.
  *
  * ```
- * ts-node src/index [filePath]
+ * docproc src/index [filePath]
  * ```
  */
 import fs from "fs";
 import path from "path";
-import { getDocProcForFile } from "./index.ts";
+import { getDocProcForFile } from "./index";
 import argParser from "./arg-parser";
 
 const args = argParser.parse_args(process.argv.slice(2));

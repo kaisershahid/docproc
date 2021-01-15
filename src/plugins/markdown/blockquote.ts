@@ -17,29 +17,29 @@ import { BlockNestableBase } from "../../defaults/block-nestable-base";
  * is handled within a blockquote.
  */
 export class BlockquoteHandler
-  extends BlockNestableBase
-  implements HandlerInterface<BlockHandlerType> {
-  getName() {
-    return "blockquote";
-  }
+	extends BlockNestableBase
+	implements HandlerInterface<BlockHandlerType> {
+	getName() {
+		return "blockquote";
+	}
 
-  canAccept(lexeme: string) {
-    return lexeme[0] == ">";
-  }
+	canAccept(lexeme: string) {
+		return lexeme[0] == ">";
+	}
 
-  isLexemeIndented(lexeme: string): boolean {
-    return lexeme[0] == ">";
-  }
+	isLexemeIndented(lexeme: string): boolean {
+		return lexeme[0] == ">";
+	}
 
-  getUnindentedLexeme(lexeme: string): string {
-    return lexeme.substr(1).replace(/^\s+/, "");
-  }
+	getUnindentedLexeme(lexeme: string): string {
+		return lexeme.substr(1).replace(/^\s+/, "");
+	}
 
-  cloneInstance(): HandlerInterface<BlockHandlerType> {
-    return new BlockquoteHandler();
-  }
+	cloneInstance(): HandlerInterface<BlockHandlerType> {
+		return new BlockquoteHandler();
+	}
 
-  toString() {
-    return "<blockquote>" + this.getSubDoc().toString() + "</blockquote>";
-  }
+	toString() {
+		return "<blockquote>" + this.getSubDoc().getString() + "</blockquote>";
+	}
 }
